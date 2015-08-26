@@ -41,7 +41,10 @@
     "mocha": "^2.2.5",
     "rimraf": "^2.3.4",
     "webpack": "^1.9.6",
-    "webpack-dev-server": "^1.8.2"
+    "webpack-dev-server": "^1.8.2",
+    "morgan": "^1.6.1",
+    "body-parser": "^1.13.3",
+    "express": "^4.13.3"
   },
   "dependencies": {
     "invariant": "^2.0.0",
