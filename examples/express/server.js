@@ -7,7 +7,7 @@ import bodyParser from 'body-parser';
 
 import timeturnerMiddleware from '../../src/middleware/express';
 
-const debug = require('debug')('dice:time-turner:express');
+const debug = require('debug')('dice:timeturner:express');
 
 const server = express();
 server.use(morgan('combined'));

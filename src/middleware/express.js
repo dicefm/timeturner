@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import express from 'express';
 
-const debug = require('debug')('dice:time-turner:express-middleware');
+const debug = require('debug')('dice:timeturner:express-middleware');
 
 export default function(opts) {
     opts = _.defaults()
