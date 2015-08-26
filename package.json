@@ -1,0 +1,51 @@
+{
+  "name": "time-turner",
+  "version": "0.0.0",
+  "description": "",
+  "main": "lib/index.js",
+  "scripts": {
+    "clean": "rimraf build dist",
+    "build": "babel src --out-dir build && cp -R ./src/both ./both && cp -R ./src/server ./server && cp -R ./src/client ./client",
+    "build:umd": "webpack src/index.js dist/time-turner.js && NODE_ENV=production webpack src/index.js dist/time-turner.min.js",
+    "lint": "eslint src test",
+    "test": "NODE_ENV=test mocha",
+    "test:watch": "NODE_ENV=test mocha --watch",
+    "test:cov": "babel-node ./node_modules/.bin/isparta cover ./node_modules/.bin/_mocha",
+    "prepublish": "npm run lint && npm run test && npm run clean && npm run build && npm run build:umd"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dicefm/time-turner.git"
+  },
+  "keywords": [
+    ""
+  ],
+  "author": "KATT",
+  "private": true,
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dicefm/time-turner/issues"
+  },
+  "homepage": "https://github.com/dicefm/time-turner",
+  "devDependencies": {
+    "babel": "^5.5.8",
+    "babel-core": "^5.6.18",
+    "babel-eslint": "^3.1.15",
+    "babel-loader": "^5.1.4",
+    "chai": "^3.2.0",
+    "eslint": "^0.23",
+    "eslint-config-airbnb": "0.0.6",
+    "eslint-plugin-react": "^2.3.0",
+    "expect": "^1.6.0",
+    "isparta": "^3.0.3",
+    "mocha": "^2.2.5",
+    "rimraf": "^2.3.4",
+    "webpack": "^1.9.6",
+    "webpack-dev-server": "^1.8.2"
+  },
+  "dependencies": {
+    "invariant": "^2.0.0",
+    "lodash": "^3.10.1",
+    "debug": "^2.2.0"
+  }
+}
