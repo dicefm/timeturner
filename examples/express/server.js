@@ -5,6 +5,8 @@ import morgan from 'morgan';
 
 import bodyParser from 'body-parser';
 
+import timeturnerMiddleware from '../../src/middleware/express';
+
 const debug = require('debug')('dice:time-turner:express');
 
 const server = express();
@@ -12,6 +14,9 @@ server.use(morgan('combined'));
 server.set('state namespace', 'App');
 
 server.use(bodyParser.json());
+
+
+server.use('/schedule', timeturnerMiddleware());
 
 
 
