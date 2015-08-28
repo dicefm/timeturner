@@ -11,7 +11,7 @@ var Request = new Schema({
     method : {type: String, enum: SUPPORTED_HTTP_METHODS, required: true },
     body   : {type: Schema.Types.Mixed },
     headers: [HTTPHeader],
-    state  : {type: String, enum: STATES, required: true },
+    state  : {type: String, enum: STATES, required: true, default: 'SCHEDULED' },
     job_id : {type: String},
 
     'model.meta.created_at': { type: Date },
@@ -37,8 +37,21 @@ Request.statics.editableFields = function() {
         'method',
         'body',
         'headers',
-        'state',
     ];
+};
+
+Request.options.toJSON = {
+    transform: function(doc, ret, options) {
+        delete ret.__v;
+
+        return ret;
+    }
+};
+
+Request.statics.toArray = function(docs, callback) {
+    return docs.map(function(doc) {
+        return doc.toObject();
+    });
 };
 
 export default Request;

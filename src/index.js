@@ -7,6 +7,7 @@ import RequestSchema from './schemas/Request';
 
 const mongoose = Promise.promisifyAll(require('mongoose'));
 
+const debug = require('debug')('dice:timeturner:index');
 
 export default function(opts) {
     opts = _.defaultsDeep({
@@ -37,17 +38,34 @@ export default function(opts) {
     // init mongo
     const mongooseConnection = mongoose.createConnection(opts.mongodb.url);
 
-    const Request = mongoose.model('Request', RequestSchema);
+    const Request = mongooseConnection.model('Request', RequestSchema);
 
-    function noop() {}
+    async function create(data) {
+        let request = new Request();
+
+        data = _.pick(data, Request.editableFields());
+        _.defaultsDeep(request, data);
+
+        await request.saveAsync();
+
+        return request.toJSON();
+    }
+
+    async function findAll(query) {
+        const items = await Request.findAsync(query);
+
+        return Request.toArray(items);
+    }
+
+    async function noop() {}
 
 
     return {
         queue: queue,
         kue  : kue,
 
-        create: noop,
-        read  : noop,
+        create: create,
+        read  : findAll,
         update: noop,
         delete: noop,
     };
