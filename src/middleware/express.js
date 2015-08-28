@@ -10,7 +10,11 @@ const debug = require('debug')('dice:timeturner:express-middleware');
 async function performAndRespond(promise, res) {
     try {
         let data = await promise;
-        res.send(data);
+        if (_.isUndefined(data)) {
+            res.sendStatus(204);
+        } else {
+            res.send(data);
+        }
     } catch (err) {
         failedOperationResponse(err, res);
     }
@@ -44,6 +48,13 @@ export default function(opts) {
 
     const tt = timeturner(opts);
 
+
+    // create
+    router.post('/', function(req, res, next) {
+        performAndRespond(tt.create(req.body), res);
+    });
+
+    // read
     router.get('/', function(req, res, next) {
         performAndRespond(tt.read(req.query), res);
     });
@@ -52,9 +63,17 @@ export default function(opts) {
         performAndRespond(tt.readId(req.params.id), res);
     });
 
-    router.post('/', function(req, res, next) {
-        performAndRespond(tt.create(req.body), res);
+    // update
+    router.patch('/:id', function(req, res, next) {
+        performAndRespond(tt.update(req.params.id, req.body), res);
     });
+
+    // delete
+    router.delete('/:id', function(req, res, next) {
+        performAndRespond(tt.delete(req.params.id), res);
+    });
+
+
 
     router.use('/_kue/', tt.kue.app);
 
