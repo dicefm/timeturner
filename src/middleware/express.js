@@ -21,10 +21,11 @@ async function performAndRespond(promise, res) {
  * Takes an error object from a mongoose `save()` call and sends a digestable output to client
  */
 function failedOperationResponse(err, res) {
-    res.status(400);
+    const statusCode = err.statusCode || 400;
+    res.status(statusCode);
 
     let ret = {
-        description: err.message
+        description: err.message,
     };
 
     if (err.errors) {
@@ -45,6 +46,10 @@ export default function(opts) {
 
     router.get('/', function(req, res, next) {
         performAndRespond(tt.read(req.query), res);
+    });
+
+    router.get('/:id', function(req, res, next) {
+        performAndRespond(tt.readId(req.params.id), res);
     });
 
     router.post('/', function(req, res, next) {

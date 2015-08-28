@@ -48,9 +48,9 @@ Request.options.toJSON = {
     }
 };
 
-Request.statics.toArray = function(docs, callback) {
+Request.statics.toJSON = function(docs, callback) {
     return docs.map(function(doc) {
-        return doc.toObject();
+        return doc.toJSON();
     });
 };
 
