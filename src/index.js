@@ -54,7 +54,19 @@ export default function(opts) {
     async function findAll(query) {
         const items = await Request.findAsync(query);
 
-        return Request.toArray(items);
+        return Request.toJSON(items);
+    }
+
+    async function findOne(id) {
+        const item = await Request.findByIdAsync(id);
+
+        if (!item) {
+            let error = new Error(`Request with id '${id}' not found.`);
+            error.statusCode = 404;
+            throw error;
+        }
+
+        return item.toJSON();
     }
 
     async function noop() {}
@@ -68,5 +80,6 @@ export default function(opts) {
         read  : findAll,
         update: noop,
         delete: noop,
+        readId: findOne,
     };
 }
