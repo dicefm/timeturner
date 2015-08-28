@@ -40,24 +40,30 @@ export default function(opts) {
 
     const Request = mongooseConnection.model('Request', RequestSchema);
 
-    async function create(data) {
-        let request = new Request();
-
+    async function updateRequest(request, data) {
         data = _.pick(data, Request.editableFields());
         _.defaultsDeep(request, data);
 
         await request.saveAsync();
 
-        return request.toJSON();
+        return request;
+    }
+
+    async function create(data) {
+        let request = new Request();
+
+        await updateRequest(request, data);
+
+        return request;
     }
 
     async function findAll(query) {
         const items = await Request.findAsync(query);
 
-        return Request.toJSON(items);
+        return items;
     }
 
-    async function findOne(id) {
+    async function findOneById(id) {
         const item = await Request.findByIdAsync(id);
 
         if (!item) {
@@ -66,10 +72,23 @@ export default function(opts) {
             throw error;
         }
 
-        return item.toJSON();
+        return item;
     }
 
-    async function noop() {}
+    async function updateById(id, data) {
+        let request = await findOneById(id);
+
+        await updateRequest(request, data);
+
+        return request;
+    }
+
+    async function deleteById(id) {
+        // ensure it exists or throw error
+        await findOneById(id);
+
+        await Request.removeAsync({_id: id});
+    }
 
 
     return {
@@ -78,8 +97,8 @@ export default function(opts) {
 
         create: create,
         read  : findAll,
-        update: noop,
-        delete: noop,
-        readId: findOne,
+        update: updateById,
+        delete: deleteById,
+        readId: findOneById,
     };
 }
