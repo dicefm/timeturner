@@ -26,6 +26,7 @@ export default function(opts) {
             url: 'mongodb://127.0.0.1:27017/timeturner',
         },
         concurrency: 5,
+        interval   : 5000, // check mongodb every 5 sec
     }, opts);
 
     // init kue
@@ -90,6 +91,39 @@ export default function(opts) {
         await Request.removeAsync({_id: id});
     }
 
+
+    // start checking for jobs
+    async function checkSchedule() {
+        await new Promise((resolve) => { setTimeout(resolve, 100); });
+        // 1. findAndUpdate {state: QUEUED} jobs to be executed
+        // 2. loop ->
+            // 1. let delay = <time between now & when job should be run>
+            // 2. pass to kue with `delay`
+            // 3. set request.job_id
+    }
+
+    /**
+     * Starts a never-ending checkSchedule loop
+     * Makes sure that a checkSchedule is run every `opts.interval` ms, but never two at once if slow
+     *
+     * @void
+     */
+    async function checkScheduleLoop() {
+        const timeStart = new Date().getUTCMilliseconds();
+        await checkSchedule();
+
+        const timeEnd = new Date().getUTCMilliseconds();
+        const diff = (timeEnd - timeStart);
+
+        debug(`finished checkSchedule() in ${diff}ms`);
+
+        const nextCheck = Math.max(opts.interval - diff, 0);
+
+
+        setTimeout(checkScheduleLoop, nextCheck);
+    }
+
+    checkScheduleLoop();
 
     return {
         queue: queue,
