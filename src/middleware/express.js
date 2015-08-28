@@ -16,7 +16,7 @@ export default function(opts) {
         res.send([]);
     });
 
-    router.use('/_kue', tt.kue.app);
+    router.use('/_kue/', tt.kue.app);
 
 
     return router;
