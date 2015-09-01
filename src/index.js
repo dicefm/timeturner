@@ -29,6 +29,7 @@ export default function(opts) {
         },
         concurrency: 5,
         interval   : 500, // check mongodb every X ms
+        autoStart  : true,
     }, opts);
 
     // init kue
@@ -116,11 +117,14 @@ export default function(opts) {
         setTimeout(checkScheduleLoop, nextCheck);
     }
 
-    checkScheduleLoop();
+    if (opts.autoStart) {
+        checkScheduleLoop();
+    }
 
     return {
         queue: queue,
         kue  : kue,
+        start: checkScheduleLoop,
 
         create: apiClient.create,
         read  : apiClient.read,
