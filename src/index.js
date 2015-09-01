@@ -48,7 +48,7 @@ export default function(opts) {
 
     const Request = mongooseConnection.model('Request', RequestSchema);
 
-    const apiClient = api(Request);
+    const apiClient = api({Request: Request});
 
     const checkSchedule = scheduleChecker({
         Request  : Request,

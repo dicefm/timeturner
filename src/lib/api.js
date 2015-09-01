@@ -1,6 +1,8 @@
 import _ from 'lodash';
 
-export default function(Request) {
+export default function(opts) {
+    const {Request} = opts;
+
     async function updateRequest(request, data) {
         data = _.pick(data, Request.editableFields());
         _.defaultsDeep(request, data);
