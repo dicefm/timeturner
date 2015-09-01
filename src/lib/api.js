@@ -53,11 +53,23 @@ export default function(opts) {
         await Request.removeAsync({_id: id});
     }
 
+    async function setState(id, state) {
+        await Request.updateAsync({
+            _id: id,
+        }, {
+            $set: {
+                state: state,
+            },
+        });
+    }
+
     return {
         create: create,
         read  : findAll,
         update: updateById,
         delete: deleteById,
         readId: findOneById,
+
+        setState: setState,
     };
 }

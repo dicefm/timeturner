@@ -39,19 +39,17 @@ export default function(opts) {
     // init kue
     const queue = kue.createQueue(kueOpts);
 
-    queue.process('request', concurrency, async function(job, done) {
-        setTimeout( () => done(), 1000);
-    });
-
-    queue.on('job complete', function(id, result) {
-        kue.Job.get(id, function(err, job){
-            if (err) {
-                return;
-            }
-            const {_id, method, url, body} = job.data;
-            debug(`finished ${_id}: ${method} to ${url} with body ${JSON.stringify(body)}`);
+    function getKueJobById(id) {
+        return new Promise((resolve, reject) => {
+            kue.Job.get(id, function(err, job){
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(job);
+                }
+            });
         });
-    });
+    }
 
     // init mongo
     const mongooseConnection = mongoose.createConnection(mongodb.url);
@@ -67,20 +65,39 @@ export default function(opts) {
         queue    : queue,
     });
 
-    Request.updateAsync({
-        }, {
-            $set: {
-                state: 'SCHEDULED'
-            }
-        }, {
-            multi: true,
-        });
-
     const loop = looper({
         interval : interval,
         autoStart: autoStart,
         fn       : checkSchedule,
     });
+
+    // process jobs
+    let i = 0;
+    queue.process('request', concurrency, async function(job, done) {
+        i++;
+        setTimeout(function() {
+            if (i % 2) {
+                done(new Error('Something went wrong!'));
+            } else {
+                done();
+            }
+        }, _.random(1000, 5000));
+    });
+
+    function finishedJob(type) {
+        return async function(id, result) {
+            const job = await getKueJobById(id);
+
+            const {_id, method, url, body} = job.data;
+
+            debug(`${type} ${_id}: ${method} to ${url} with body ${JSON.stringify(body)}`);
+            apiClient.setState(_id, type);
+        };
+    }
+
+    queue.on('job complete', finishedJob('SUCCESS'));
+    queue.on('job failed', finishedJob('FAIL'));
+
 
     return {
         queue: queue,
