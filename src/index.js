@@ -65,6 +65,23 @@ export default function(opts) {
         // 2. loop ->
         for (let request of requests) {
             // 1. let delay = <time between now & when job should be run>
+            // make sure atomic
+            const response = await Request.updateAsync({
+                _id  : request._id,
+                state: 'SCHEDULED',
+            }, {
+                $set: {
+                    state: 'QUEUED'
+                }
+            }, {
+                multi: true,
+            });
+
+            if (response.nModified !== 1) {
+                debug(`Something else is fiddling with '${request._id}'. Skipping run.`);
+                continue;
+            }
+
             let delay = moment(request.date).diff(moment());
             debug(`Scheduling ${request.method} to ${request.url} in ${delay} ms`);
 
