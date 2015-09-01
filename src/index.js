@@ -1,9 +1,11 @@
 import _ from 'lodash';
 import kue from 'kue';
+import moment from 'moment';
 
 import Promise from 'bluebird';
 
 import RequestSchema from './schemas/Request';
+import api from './lib/api';
 
 const mongoose = Promise.promisifyAll(require('mongoose'));
 
@@ -26,7 +28,7 @@ export default function(opts) {
             url: 'mongodb://127.0.0.1:27017/timeturner',
         },
         concurrency: 5,
-        interval   : 5000, // check mongodb every 5 sec
+        interval   : 500, // check mongodb every X ms
     }, opts);
 
     // init kue
@@ -41,65 +43,39 @@ export default function(opts) {
 
     const Request = mongooseConnection.model('Request', RequestSchema);
 
-    async function updateRequest(request, data) {
-        data = _.pick(data, Request.editableFields());
-        _.defaultsDeep(request, data);
-
-        await request.saveAsync();
-
-        return request;
-    }
-
-    async function create(data) {
-        let request = new Request();
-
-        await updateRequest(request, data);
-
-        return request;
-    }
-
-    async function findAll(query) {
-        const items = await Request.findAsync(query);
-
-        return items;
-    }
-
-    async function findOneById(id) {
-        const item = await Request.findByIdAsync(id);
-
-        if (!item) {
-            let error = new Error(`Request with id '${id}' not found.`);
-            error.statusCode = 404;
-            throw error;
-        }
-
-        return item;
-    }
-
-    async function updateById(id, data) {
-        let request = await findOneById(id);
-
-        await updateRequest(request, data);
-
-        return request;
-    }
-
-    async function deleteById(id) {
-        // ensure it exists or throw error
-        await findOneById(id);
-
-        await Request.removeAsync({_id: id});
-    }
+    const apiClient = api(Request);
 
 
     // start checking for jobs
     async function checkSchedule() {
-        await new Promise((resolve) => { setTimeout(resolve, 100); });
+        const endOfInterval = new Date(Date.now() + opts.interval);
+
         // 1. findAndUpdate {state: QUEUED} jobs to be executed
+        const requests = await apiClient.read({
+            state: 'SCHEDULED',
+            date : {
+                $lte: endOfInterval
+            }
+        });
+
+        // TODO update to QUEING straight away (make atomic)
+
+        debug(`Scheduling ${requests.length} requests`);
+
         // 2. loop ->
+        for (let request of requests) {
             // 1. let delay = <time between now & when job should be run>
+            let delay = moment(request.date).diff(moment());
+            debug(`Scheduling ${request.method} to ${request.url} in ${delay} ms`);
+
+            if (delay < 0) {
+                debug(`Whoops. Seems like this has been delayed a bit.`);
+                delay = 0;
+            }
+
             // 2. pass to kue with `delay`
             // 3. set request.job_id
+        }
     }
 
     /**
@@ -129,10 +105,10 @@ export default function(opts) {
         queue: queue,
         kue  : kue,
 
-        create: create,
-        read  : findAll,
-        update: updateById,
-        delete: deleteById,
-        readId: findOneById,
+        create: apiClient.create,
+        read  : apiClient.read,
+        update: apiClient.update,
+        delete: apiClient.delete,
+        readId: apiClient.readId,
     };
 }

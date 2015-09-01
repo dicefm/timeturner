@@ -3,7 +3,7 @@ import {Schema} from 'mongoose';
 import HTTPHeader from './HTTPHeader';
 
 const SUPPORTED_HTTP_METHODS = ['GET', 'POST', 'PUT', 'DELETE'];
-const STATES = ['SCHEDULED', 'QUEUED', 'COMPLETED'];
+const STATES = ['SCHEDULED', 'QUEING', 'QUEUED', 'COMPLETED'];
 
 var Request = new Schema({
     url    : {type: String, required: true, trim: true },
