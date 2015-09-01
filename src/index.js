@@ -6,6 +6,7 @@ import Promise from 'bluebird';
 
 import RequestSchema from './schemas/Request';
 import api from './lib/api';
+import looper from './lib/looper';
 
 const mongoose = Promise.promisifyAll(require('mongoose'));
 
@@ -32,15 +33,17 @@ export default function(opts) {
         autoStart  : true,
     }, opts);
 
-    // init kue
-    const queue = kue.createQueue(opts.kue);
+    const {kue: kueOpts, mongodb, concurrency, interval, autoStart} = opts;
 
-    queue.process('request', opts.concurrency, async function(job, done) {
+    // init kue
+    const queue = kue.createQueue(kueOpts);
+
+    queue.process('request', concurrency, async function(job, done) {
         setTimeout( () => done(), 1000);
     });
 
     // init mongo
-    const mongooseConnection = mongoose.createConnection(opts.mongodb.url);
+    const mongooseConnection = mongoose.createConnection(mongodb.url);
 
     const Request = mongooseConnection.model('Request', RequestSchema);
 
@@ -49,7 +52,7 @@ export default function(opts) {
 
     // start checking for jobs
     async function checkSchedule() {
-        const endOfInterval = new Date(Date.now() + opts.interval);
+        const endOfInterval = new Date(Date.now() + interval);
 
         // 1. findAndUpdate {state: QUEUED} jobs to be executed
         const requests = await apiClient.read({
@@ -96,35 +99,19 @@ export default function(opts) {
         }
     }
 
-    /**
-     * Starts a never-ending checkSchedule loop
-     * Makes sure that a checkSchedule is run every `opts.interval` ms, but never two at once if slow
-     *
-     * @void
-     */
-    async function checkScheduleLoop() {
-        const timeStart = new Date().getUTCMilliseconds();
-        await checkSchedule();
 
-        const timeEnd = new Date().getUTCMilliseconds();
-        const diff = (timeEnd - timeStart);
-
-        debug(`finished checkSchedule() in ${diff}ms`);
-
-        const nextCheck = Math.max(opts.interval - diff, 0);
-
-
-        setTimeout(checkScheduleLoop, nextCheck);
-    }
-
-    if (opts.autoStart) {
-        checkScheduleLoop();
-    }
+    const loop = looper({
+        interval : interval,
+        autoStart: autoStart,
+        fn       : checkSchedule,
+    });
 
     return {
         queue: queue,
         kue  : kue,
-        start: checkScheduleLoop,
+
+        start: loop.start,
+        stop : loop.stop,
 
         create: apiClient.create,
         read  : apiClient.read,
