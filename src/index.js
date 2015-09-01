@@ -43,6 +43,16 @@ export default function(opts) {
         setTimeout( () => done(), 1000);
     });
 
+    queue.on('job complete', function(id, result) {
+        kue.Job.get(id, function(err, job){
+            if (err) {
+                return;
+            }
+            const {_id, method, url, body} = job.data;
+            debug(`finished ${_id}: ${method} to ${url} with body ${JSON.stringify(body)}`);
+        });
+    });
+
     // init mongo
     const mongooseConnection = mongoose.createConnection(mongodb.url);
 
@@ -54,6 +64,7 @@ export default function(opts) {
         Request  : Request,
         apiClient: apiClient,
         interval : interval,
+        queue    : queue,
     });
 
     Request.updateAsync({

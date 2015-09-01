@@ -8,9 +8,10 @@ export default function(opts) {
         Request  : null,
         apiClient: null,
         interval : 500,
+        queue    : null,
     }, opts);
 
-    const {Request, apiClient, interval} = opts;
+    const {Request, apiClient, interval, queue} = opts;
 
     /**
      * Makes sure that request is an atomic operation by updating into a QUEUED state
@@ -33,6 +34,30 @@ export default function(opts) {
         }
 
         return true;
+    }
+
+    async function createJob(request) {
+        let delay = moment(request.date).diff(moment());
+        debug(`Scheduling ${request.method} to ${request.url} in ${delay} ms`);
+
+        if (delay < 0) {
+            debug(`Whoops. Seems like this has been delayed ${Math.abs(delay)} milliseconds.`);
+            delay = 0;
+        }
+
+        return new Promise((resolve, reject) => {
+            const job = queue
+                .create('request', request.toObject())
+                .delay(delay)
+                .save((err) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(job);
+                    }
+                })
+                ;
+        });
     }
 
     // start checking for jobs
@@ -60,16 +85,11 @@ export default function(opts) {
                 continue;
             }
 
-            let delay = moment(request.date).diff(moment());
-            debug(`Scheduling ${request.method} to ${request.url} in ${delay} ms`);
-
-            if (delay < 0) {
-                debug(`Whoops. Seems like this has been delayed ${Math.abs(delay)} milliseconds.`);
-                delay = 0;
-            }
-
             // 2. pass to kue with `delay`
+            const job = await createJob(request);
+
             // 3. set request.job_id
+            request.job_id = job.id;
 
             // 4. set state to QUEUED
             request.state = 'QUEUED';
