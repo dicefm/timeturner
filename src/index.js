@@ -56,6 +56,14 @@ export default function(opts) {
         interval : interval,
     });
 
+    Request.updateAsync({
+        }, {
+            $set: {
+                state: 'SCHEDULED'
+            }
+        }, {
+            multi: true,
+        });
 
     const loop = looper({
         interval : interval,
