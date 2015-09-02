@@ -10,11 +10,13 @@ export default function(opts) {
         try {
             const {data} = job;
 
-            const {url, headers} = data;
+            const {url, headers, body, method} = data;
 
             const reqOpts = {
                 uri    : url,
                 headers: headers,
+                method : method,
+                body   : body,
 
                 resolveWithFullResponse: true,
             };
