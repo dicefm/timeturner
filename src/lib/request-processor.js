@@ -12,7 +12,7 @@ export default function(opts) {
 
             const {url, headers, body, method} = data;
 
-            const reqOpts = {
+            let reqOpts = {
                 uri    : url,
                 headers: headers,
                 method : method,
@@ -21,13 +21,17 @@ export default function(opts) {
                 resolveWithFullResponse: true,
             };
 
+            if (reqOpts.headers['content-type'] === 'application/json') {
+                reqOpts.json = true;
+            }
+
             debug('performing request with reqOpts:', reqOpts);
 
             const response = await request(reqOpts);
 
             done(null, response);
         } catch (err) {
-            debug(`ERROR ${err.statusCode} ${err.name}`);
+            debug(`ERROR ${err.statusCode} ${err.name}`, err);
             err.message = HTMLEntities.encode(err.message);
             done(err);
         }

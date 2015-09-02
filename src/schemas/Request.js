@@ -49,6 +49,25 @@ Request.pre('save', function(next) {
     next();
 });
 
+Request.pre('save', function(next) {
+    // lowercase all header keys
+    let headers = this.headers;
+
+    for (const key in headers) {
+        const keyLowerCase = key.toLowerCase();
+
+        if (key !== keyLowerCase) {
+            const value = headers[key];
+
+            headers[keyLowerCase] = value;
+            delete headers[key];
+        }
+    }
+
+    next();
+});
+
+
 Request.statics.editableFields = function() {
     return [
         'url',
