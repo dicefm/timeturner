@@ -1,17 +1,83 @@
 import _ from 'lodash';
 import express from 'express';
 
+import timeturner from '../index';
+
 const debug = require('debug')('dice:timeturner:express-middleware');
 
+
+
+async function performAndRespond(promise, res) {
+    try {
+        let data = await promise;
+        if (_.isUndefined(data)) {
+            res.sendStatus(204);
+        } else {
+            res.send(data);
+        }
+    } catch (err) {
+        failedOperationResponse(err, res);
+    }
+}
+
+
+/**
+ * Takes an error object from a mongoose `save()` call and sends a digestable output to client
+ */
+function failedOperationResponse(err, res) {
+    const statusCode = err.statusCode || 400;
+    res.status(statusCode);
+
+    let ret = {
+        description: err.message,
+    };
+
+    if (err.errors) {
+        let errors = {};
+        for (let key in err.errors) {
+            errors[key] = err.errors[key].message;
+        }
+        ret.errors = errors;
+    }
+    res.send(ret);
+}
+
+
 export default function(opts) {
-    opts = _.defaults()
     const router = express.Router();
 
-    router.get('/', async function(req, res, next) {
-        // get all scheduled requests
-        res.send([]);
+    const tt = timeturner(opts);
+
+
+    // create
+    router.post('/', function(req, res, next) {
+        performAndRespond(tt.create(req.body), res);
     });
+
+    // read
+    router.get('/', function(req, res, next) {
+        performAndRespond(tt.read(req.query), res);
+    });
+
+    router.get('/:id', function(req, res, next) {
+        performAndRespond(tt.readId(req.params.id), res);
+    });
+
+    // update
+    router.patch('/:id', function(req, res, next) {
+        performAndRespond(tt.update(req.params.id, req.body), res);
+    });
+
+    // delete
+    router.delete('/:id', function(req, res, next) {
+        performAndRespond(tt.delete(req.params.id), res);
+    });
+
+
+
+    router.use('/_kue/', tt.kue.app);
 
 
     return router;
 }
+
