@@ -46,8 +46,14 @@ export default function(opts) {
         }
 
         return new Promise((resolve, reject) => {
+            let jobOpts = request.toObject();
+
+            const {method, url} = jobOpts;
+
+            jobOpts.title = `${method} to ${url}`;
+
             const job = queue
-                .create('request', request.toObject())
+                .create('request', jobOpts)
                 .delay(delay)
                 .save((err) => {
                     if (err) {
