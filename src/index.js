@@ -15,7 +15,7 @@ const mongoose = Promise.promisifyAll(require('mongoose'));
 const debug = require('debug')('dice:timeturner:index');
 
 export default function(opts) {
-    opts = _.defaultsDeep({
+    opts = _.merge({
         kue: {
             prefix: 'q',
             redis : {
