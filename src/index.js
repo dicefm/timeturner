@@ -8,6 +8,7 @@ import RequestSchema from './schemas/Request';
 import api from './lib/api';
 import looper from './lib/looper';
 import scheduleChecker from './lib/schedule-checker';
+import requestProcessor from './lib/request-processor';
 
 const mongoose = Promise.promisifyAll(require('mongoose'));
 
@@ -72,17 +73,8 @@ export default function(opts) {
     });
 
     // process jobs
-    let i = 0;
-    queue.process('request', concurrency, async function(job, done) {
-        i++;
-        setTimeout(function() {
-            if (i % 2) {
-                done(new Error('Something went wrong!'));
-            } else {
-                done();
-            }
-        }, _.random(1000, 5000));
-    });
+    const processRequest = requestProcessor();
+    queue.process('request', concurrency, processRequest);
 
     function finishedJob(type) {
         return async function(id, result) {
