@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "scripts": {
     "clean": "rimraf build dist",
-    "build": "babel src --out-dir build && cp -R ./src/both ./both && cp -R ./src/server ./server && cp -R ./src/client ./client",
+    "build": "babel src --out-dir build",
     "build:umd": "webpack src/index.js dist/timeturner.js && NODE_ENV=production webpack src/index.js dist/timeturner.min.js",
     "lint": "eslint src test",
     "test": "NODE_ENV=test mocha",
