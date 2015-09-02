@@ -5,12 +5,31 @@ import HTTPHeader from './HTTPHeader';
 const SUPPORTED_HTTP_METHODS = ['GET', 'POST', 'PUT', 'DELETE'];
 const STATES = ['SCHEDULED', 'QUEING', 'QUEUED', 'SUCCESS', 'ERROR'];
 
-var Request = new Schema({
+function headersValidator(headers) {
+    if (typeof headers !== 'object') {
+        return false;
+    }
+
+    for (const key in headers) {
+        const value = headers[key];
+
+        if (typeof key !== 'string') {
+            return false;
+        }
+        if (typeof value !== 'string') {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+const Request = new Schema({
     url    : {type: String, required: true, trim: true },
     date   : {type: Date, required: true },
     method : {type: String, enum: SUPPORTED_HTTP_METHODS, required: true },
     body   : {type: Schema.Types.Mixed },
-    headers: [HTTPHeader],
+    headers: {type: Schema.Types.Mixed, required: true, default: {}, validate: headersValidator},
     state  : {type: String, enum: STATES, required: true, default: 'SCHEDULED' },
     job_id : {type: String},
 
