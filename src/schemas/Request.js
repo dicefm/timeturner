@@ -2,6 +2,8 @@ import {Schema} from 'mongoose';
 
 import HTTPHeader from './HTTPHeader';
 
+import timestampPlugin from './plugins/timestamp';
+
 const SUPPORTED_HTTP_METHODS = ['GET', 'POST', 'PUT', 'DELETE'];
 const STATES = ['SCHEDULED', 'QUEING', 'QUEUED', 'SUCCESS', 'ERROR'];
 
@@ -32,22 +34,9 @@ const Request = new Schema({
     headers: {type: Schema.Types.Mixed, required: true, default: {}, validate: headersValidator},
     state  : {type: String, enum: STATES, required: true, default: 'SCHEDULED' },
     job_id : {type: String},
-
-    'model.meta.created_at': { type: Date },
-    'model.meta.updated_at': { type: Date },
 });
 
-
-Request.pre('save', function(next) {
-    let now = new Date();
-
-    this.model.meta.updated_at = now;
-    if (!this.model.meta.created_at) {
-        this.model.meta.created_at = now;
-    }
-
-    next();
-});
+Request.plugin(timestampPlugin);
 
 Request.pre('save', function(next) {
     // lowercase all header keys
