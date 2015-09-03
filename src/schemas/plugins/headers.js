@@ -1,16 +1,14 @@
 import {Schema} from 'mongoose';
+import {isPlainObject} from 'lodash';
 
 function headersValidator(headers) {
-    if (typeof headers !== 'object') {
+    if (!isPlainObject(headers)) {
         return false;
     }
 
     for (const key in headers) {
         const value = headers[key];
 
-        if (typeof key !== 'string') {
-            return false;
-        }
         if (typeof value !== 'string') {
             return false;
         }
