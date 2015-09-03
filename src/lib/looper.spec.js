@@ -39,6 +39,20 @@ describe('looper', () => {
             it('should call `fn` once immediately', () => {
                 expect(spy).to.have.been.calledOnce;
             });
+            it('should not do anything on an accidental second `start()` call', () => {
+                loop.start();
+                expect(spy).to.have.been.calledOnce;
+            });
+        });
+
+        describe('with non-function `fn`', () => {
+            it('should throw an error', () => {
+                expect(function() {
+                    loop = looper({
+                        fn: null,
+                    });
+                }).to.throw(`'opts.fn' needs to be a function. ${typeof null} received`);
+            });
         });
 
         describe('with autoStart=false', () => {
