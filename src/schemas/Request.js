@@ -3,58 +3,22 @@ import {Schema} from 'mongoose';
 import HTTPHeader from './HTTPHeader';
 
 import timestampPlugin from './plugins/timestamp';
+import headersPlugin from './plugins/headers';
 
 const SUPPORTED_HTTP_METHODS = ['GET', 'POST', 'PUT', 'DELETE'];
 const STATES = ['SCHEDULED', 'QUEING', 'QUEUED', 'SUCCESS', 'ERROR'];
 
-function headersValidator(headers) {
-    if (typeof headers !== 'object') {
-        return false;
-    }
-
-    for (const key in headers) {
-        const value = headers[key];
-
-        if (typeof key !== 'string') {
-            return false;
-        }
-        if (typeof value !== 'string') {
-            return false;
-        }
-    }
-
-    return true;
-}
-
 const Request = new Schema({
-    url    : {type: String, required: true, trim: true },
-    date   : {type: Date, required: true },
-    method : {type: String, enum: SUPPORTED_HTTP_METHODS, required: true },
-    body   : {type: Schema.Types.Mixed },
-    headers: {type: Schema.Types.Mixed, required: true, default: {}, validate: headersValidator},
-    state  : {type: String, enum: STATES, required: true, default: 'SCHEDULED' },
-    job_id : {type: String},
+    url   : {type: String, required: true, trim: true },
+    date  : {type: Date, required: true },
+    method: {type: String, enum: SUPPORTED_HTTP_METHODS, required: true },
+    body  : {type: Schema.Types.Mixed },
+    state : {type: String, enum: STATES, required: true, default: 'SCHEDULED' },
+    job_id: {type: String},
 });
 
 Request.plugin(timestampPlugin);
-
-Request.pre('save', function(next) {
-    // lowercase all header keys
-    let headers = this.headers;
-
-    for (const key in headers) {
-        const keyLowerCase = key.toLowerCase();
-
-        if (key !== keyLowerCase) {
-            const value = headers[key];
-
-            headers[keyLowerCase] = value;
-            delete headers[key];
-        }
-    }
-
-    next();
-});
+Request.plugin(headersPlugin);
 
 
 Request.statics.editableFields = function() {
