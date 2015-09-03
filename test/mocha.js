@@ -1,8 +1,8 @@
 import chai from 'chai';
 import sinon from 'sinon';
-import sinonChai from 'sinon-chai';
 
-chai.use(sinonChai);
+chai.use(require('sinon-chai'));
+chai.use(require('chai-datetime'));
 
 global.expect = chai.expect;
 global.sinon = sinon;
