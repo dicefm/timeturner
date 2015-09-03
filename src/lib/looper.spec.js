@@ -21,7 +21,7 @@ describe('looper', () => {
         clock.tick(ms);
         return new Promise((resolve) => {
             resolve();
-        })
+        });
     }
 
     describe('when creating', () => {
@@ -126,6 +126,7 @@ describe('looper', () => {
 
         afterEach(() => {
             loop.stop();
+            clock.restore();
         });
 
         it('shouldnt call `fn` if the first cycle isnt completed', async function(done) {
