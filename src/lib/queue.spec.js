@@ -4,6 +4,12 @@ import queueModule from './queue';
 describe('queueModule', () => {
     let _queue;
 
+    function deferred(fn) {
+        return function() {
+            setTimeout(fn, 10);
+        };
+    }
+
     function queueFactory(opts) {
         let {kue, processRequest, concurrency, apiClient} = opts;
         if (!apiClient) {
@@ -46,19 +52,17 @@ describe('queueModule', () => {
             })
             ;
 
-        job.on('complete', () => {
-            _.defer(() => {
-                expect(processRequest).to.have.been.calledOnce;
-                expect(processRequest.args[0][0].id).to.eq(''+job.id);
-                expect(processRequest.args[0][0].data).to.deep.eq(data);
+        queue.on('job complete', deferred(() => {
+            expect(processRequest).to.have.been.calledOnce;
+            expect(processRequest.args[0][0].id).to.eq(''+job.id);
+            expect(processRequest.args[0][0].data).to.deep.eq(data);
 
-                expect(apiClient.setState).to.have.been.calledOnce;
-                expect(apiClient.setState).to.have.been.calledWith(_id, 'SUCCESS');
+            expect(apiClient.setState).to.have.been.calledOnce;
+            expect(apiClient.setState).to.have.been.calledWith(_id, 'SUCCESS');
 
-                done();
-            });
-        });
-        job.on('failed', done);
+            done();
+        }));
+        queue.on('job failed', done);
         queue.on('error', done);
     });
 
@@ -77,21 +81,19 @@ describe('queueModule', () => {
             })
             ;
 
-        job.on('complete', () => {
+        queue.on('job complete', () => {
             done(new Error('Shouldn\'t have succeeded!'));
         });
-        job.on('failed', () => {
-            _.defer(() => {
-                expect(processRequest).to.have.been.calledOnce;
-                expect(processRequest.args[0][0].id).to.eq(''+job.id);
-                expect(processRequest.args[0][0].data).to.deep.eq(data);
+        queue.on('job failed', deferred(() => {
+            expect(processRequest).to.have.been.calledOnce;
+            expect(processRequest.args[0][0].id).to.eq(''+job.id);
+            expect(processRequest.args[0][0].data).to.deep.eq(data);
 
-                expect(apiClient.setState).to.have.been.calledOnce;
-                expect(apiClient.setState).to.have.been.calledWith(_id, 'FAIL');
+            expect(apiClient.setState).to.have.been.calledOnce;
+            expect(apiClient.setState).to.have.been.calledWith(_id, 'FAIL');
 
-                done();
-            });
-        });
+            done();
+        }));
         queue.on('error', done);
     });
 
