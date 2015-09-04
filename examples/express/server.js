@@ -2,6 +2,7 @@
 
 import express from 'express';
 import morgan from 'morgan';
+import url from 'url';
 
 import bodyParser from 'body-parser';
 
@@ -40,6 +41,21 @@ if (REDIS_PASSWORD) {
 
 
 const tt = timeturner(opts);
+
+
+tt.RequestSchema.path('url').validate(function (value) {
+    const {host} = url.parse(value);
+
+    return /\.dice\.fm$/.test(host);
+}, 'URL needs to match *.dice.fm');
+
+tt.RequestSchema.path('url').validate(function (value) {
+    const {search} = url.parse(value);
+
+    return !search;
+}, 'You\'re not allowed to pass any query params to the URL');
+
+
 server.use('/schedule', tt.expressMiddleware());
 
 

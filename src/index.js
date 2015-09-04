@@ -79,6 +79,8 @@ export default function(opts) {
         loop: loop,
         api : apiClient,
 
+        RequestSchema: RequestSchema,
+
         expressMiddleware: createExpressMiddleware,
     };
 }
