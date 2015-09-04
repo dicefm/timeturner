@@ -29,63 +29,64 @@ describe('timestampPlugin', () => {
         db.close();
     });
 
-
-    beforeEach(() => {
-        entry = new SimpleModel();
-        entry.name = 'TestModel';
-    });
-
-    afterEach(() => {
-    });
-
     it('should be a function', () => {
         expect(timestampPlugin).to.be.a.function;
     });
 
-    describe('when creating', () => {
-        it('should set both created_at/updated_at', (done) => {
-            entry.save((err) => {
-                expect(err).to.not.be.ok;
-
-                const timestampAfter = new Date;
-
-                expect(entry.model.meta.created_at).to.be.afterTime(timestampBefore);
-                expect(entry.model.meta.updated_at).to.be.afterTime(timestampBefore);
-
-                expect(entry.model.meta.created_at).to.be.beforeTime(timestampAfter);
-                expect(entry.model.meta.updated_at).to.be.beforeTime(timestampAfter);
-
-                expect(entry.model.meta.created_at).to.be.equalTime(entry.model.meta.updated_at);
-
-                done();
-            });
+    describe('when calling save()', () => {
+        beforeEach(() => {
+            entry = new SimpleModel();
+            entry.name = 'TestModel';
         });
-    });
 
+        afterEach(() => {
+        });
 
-    describe('when updating', () => {
-        it('should set updated_at to now w/o updating created_at', (done) => {
-            let timestampBeforeUpdate;
-            let createdAt;
+        describe('if it\'s a new entry', () => {
+            it('should set both created_at/updated_at', (done) => {
+                entry.save((err) => {
+                    expect(err).to.not.be.ok;
 
-            entry.saveAsync()
-                .then(() => {
-                    expect(entry.model.meta.created_at).to.be.equalTime(entry.model.meta.updated_at);
-
-                    timestampBeforeUpdate = new Date;
-                    createdAt = entry.model.meta.created_at;
-                    return entry.saveAsync();
-                })
-                .then(() => {
                     const timestampAfter = new Date;
 
-                    expect(entry.model.meta.created_at).to.be.equalTime(createdAt);
+                    expect(entry.model.meta.created_at).to.be.afterTime(timestampBefore);
+                    expect(entry.model.meta.updated_at).to.be.afterTime(timestampBefore);
 
-                    expect(entry.model.meta.updated_at).to.be.afterTime(createdAt);
-                })
-                .then(done)
-                .catch(done)
-                ;
+                    expect(entry.model.meta.created_at).to.be.beforeTime(timestampAfter);
+                    expect(entry.model.meta.updated_at).to.be.beforeTime(timestampAfter);
+
+                    expect(entry.model.meta.created_at).to.be.equalTime(entry.model.meta.updated_at);
+
+                    done();
+                });
+            });
+        });
+
+
+        describe('if it\'s an existing entry', () => {
+            it('should set updated_at to now w/o updating created_at', (done) => {
+                let timestampBeforeUpdate;
+                let createdAt;
+
+                entry.saveAsync()
+                    .then(() => {
+                        expect(entry.model.meta.created_at).to.be.equalTime(entry.model.meta.updated_at);
+
+                        timestampBeforeUpdate = new Date;
+                        createdAt = entry.model.meta.created_at;
+                        return entry.saveAsync();
+                    })
+                    .then(() => {
+                        const timestampAfter = new Date;
+
+                        expect(entry.model.meta.created_at).to.be.equalTime(createdAt);
+
+                        expect(entry.model.meta.updated_at).to.be.afterTime(createdAt);
+                    })
+                    .then(done)
+                    .catch(done)
+                    ;
+            });
         });
     });
 });
