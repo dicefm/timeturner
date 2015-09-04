@@ -156,4 +156,43 @@ describe('timestampPlugin', () => {
             .catch(done);
         });
     });
+
+
+    describe('when calling findOneAndUpdate()', () => {
+        let timestampBeforeUpdate;
+        let $set;
+
+        const conditions = {
+            name: 'TestModel ShouldBeUpdated',
+        };
+
+
+        beforeEach(function(done) {
+            $set = {
+                name: `TestModel ${Math.random()}`,
+            };
+            Promise.all([
+                new SimpleModel({name: 'TestModel ShouldBeUpdated'}).saveAsync(),
+            ])
+            .then(() => {
+                timestampBeforeUpdate = new Date();
+
+                return SimpleModel.findOneAndUpdate(conditions, {
+                    $set: $set,
+                });
+            })
+            .then(() => { done() })
+            .catch(done);
+        });
+
+
+        it('should set updated_at', (done) => {
+            SimpleModel.findOne($set).then((entry) => {
+                expect(entry.model.meta.updated_at).to.be.afterTime(timestampBefore);
+                expect(entry.model.meta.created_at).to.be.beforeTime(timestampBeforeUpdate);
+            })
+            .then(done)
+            .catch(done);
+        });
+    });
 });
