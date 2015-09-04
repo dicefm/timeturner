@@ -37,6 +37,8 @@ export default function(opts) {
         autoStart  : true,
     }, opts);
 
+    debug('Starting with options:', opts);
+
     const {kue: kueOpts, mongodb, concurrency, interval, autoStart} = opts;
 
     const queue = queueModule({

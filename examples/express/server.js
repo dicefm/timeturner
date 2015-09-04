@@ -35,7 +35,7 @@ if (REDIS_PORT) {
     opts.kue.redis.port = REDIS_PORT;
 }
 if (REDIS_PASSWORD) {
-    opts.kue.redis.password = REDIS_PASSWORD;
+    opts.kue.redis.auth = REDIS_PASSWORD;
 }
 
 
