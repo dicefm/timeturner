@@ -41,11 +41,6 @@ export default function(opts) {
 
     const {kue: kueOpts, mongodb, concurrency, interval, autoStart} = opts;
 
-    const queue = queueModule({
-        kue           : kueOpts,
-        concurrency   : concurrency,
-        processRequest: requestProcessor(),
-    })
 
     // init mongo
     const mongooseConnection = mongoose.createConnection(mongodb.url);
@@ -53,6 +48,14 @@ export default function(opts) {
     const Request = mongooseConnection.model('Request', RequestSchema);
 
     const apiClient = api({Request: Request});
+
+    // init queue
+    const queue = queueModule({
+        kue           : kueOpts,
+        apiClient     : apiClient,
+        concurrency   : concurrency,
+        processRequest: requestProcessor(),
+    })
 
     const checkSchedule = scheduleChecker({
         Request  : Request,
@@ -77,9 +80,10 @@ export default function(opts) {
 
 
     return {
-        kue : kue,
-        loop: loop,
-        api : apiClient,
+        kue  : kue,
+        loop : loop,
+        api  : apiClient,
+        queue: queue,
 
         RequestSchema: RequestSchema,
 
