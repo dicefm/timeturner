@@ -14,4 +14,14 @@ export default function(schema, opts) {
 
         next();
     });
+
+    schema.pre('update', function(next) {
+        const $set = {
+            'model.meta.updated_at': new Date()
+        };
+
+        this.update({}, { $set: $set });
+
+        next();
+    });
 };
