@@ -2,33 +2,24 @@ import {Schema} from 'mongoose';
 
 import HTTPHeader from './HTTPHeader';
 
+import timestampPlugin from './plugins/timestamp';
+import headersPlugin from './plugins/headers';
+
 const SUPPORTED_HTTP_METHODS = ['GET', 'POST', 'PUT', 'DELETE'];
 const STATES = ['SCHEDULED', 'QUEING', 'QUEUED', 'SUCCESS', 'ERROR'];
 
-var Request = new Schema({
-    url    : {type: String, required: true, trim: true },
-    date   : {type: Date, required: true },
-    method : {type: String, enum: SUPPORTED_HTTP_METHODS, required: true },
-    body   : {type: Schema.Types.Mixed },
-    headers: [HTTPHeader],
-    state  : {type: String, enum: STATES, required: true, default: 'SCHEDULED' },
-    job_id : {type: String},
-
-    'model.meta.created_at': { type: Date },
-    'model.meta.updated_at': { type: Date },
+const Request = new Schema({
+    url   : {type: String, required: true, trim: true },
+    date  : {type: Date, required: true },
+    method: {type: String, enum: SUPPORTED_HTTP_METHODS, required: true },
+    body  : {type: Schema.Types.Mixed },
+    state : {type: String, enum: STATES, required: true, default: 'SCHEDULED' },
+    job_id: {type: String},
 });
 
+Request.plugin(timestampPlugin);
+Request.plugin(headersPlugin);
 
-Request.pre('save', function(next) {
-    let now = new Date();
-
-    this.model.meta.updated_at = now;
-    if (!this.model.meta.created_at) {
-        this.model.meta.created_at = now;
-    }
-
-    next();
-});
 
 Request.statics.editableFields = function() {
     return [
