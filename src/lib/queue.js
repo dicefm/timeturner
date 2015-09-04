@@ -1,9 +1,13 @@
+import _ from 'lodash';
 import kue from 'kue';
+import Promise from 'bluebird';
 
 const debug = require('debug')('dice:timeturner:kue');
 
 export default function(opts) {
-    const {kue: kueOpts, processRequest, concurrency} = opts;
+    opts = _.assign({}, opts);
+
+    const {kue: kueOpts, processRequest, concurrency, apiClient} = opts;
 
     // init kue
     const queue = kue.createQueue(kueOpts);
@@ -19,7 +23,6 @@ export default function(opts) {
             });
         });
     }
-
 
     // process jobs
     queue.process('request', concurrency, processRequest);
