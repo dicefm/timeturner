@@ -9,6 +9,7 @@ import api from './lib/api';
 import looper from './lib/looper';
 import scheduleChecker from './lib/schedule-checker';
 import requestProcessor from './lib/request-processor';
+import expressMiddleware from './middleware/express';
 
 const mongoose = Promise.promisifyAll(require('mongoose'));
 
@@ -91,17 +92,20 @@ export default function(opts) {
     queue.on('job failed', finishedJob('FAIL'));
 
 
+    function createExpressMiddleware() {
+        return expressMiddleware({
+            api: apiClient,
+            kue: kue,
+        });
+    }
+
+
     return {
         queue: queue,
         kue  : kue,
+        loop : loop,
+        api  : apiClient,
 
-        start: loop.start,
-        stop : loop.stop,
-
-        create: apiClient.create,
-        read  : apiClient.read,
-        update: apiClient.update,
-        delete: apiClient.delete,
-        readId: apiClient.readId,
+        expressMiddleware: createExpressMiddleware,
     };
 }

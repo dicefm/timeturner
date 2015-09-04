@@ -44,38 +44,36 @@ function failedOperationResponse(err, res) {
 
 
 export default function(opts) {
+    const {api, kue} = opts;
+
     const router = express.Router();
-
-    const tt = timeturner(opts);
-
 
     // create
     router.post('/', function(req, res, next) {
-        performAndRespond(tt.create(req.body), res);
+        performAndRespond(api.create(req.body), res);
     });
 
     // read
     router.get('/', function(req, res, next) {
-        performAndRespond(tt.read(req.query), res);
+        performAndRespond(api.read(req.query), res);
     });
 
     router.get('/:id', function(req, res, next) {
-        performAndRespond(tt.readId(req.params.id), res);
+        performAndRespond(api.readId(req.params.id), res);
     });
 
     // update
     router.patch('/:id', function(req, res, next) {
-        performAndRespond(tt.update(req.params.id, req.body), res);
+        performAndRespond(api.update(req.params.id, req.body), res);
     });
 
     // delete
     router.delete('/:id', function(req, res, next) {
-        performAndRespond(tt.delete(req.params.id), res);
+        performAndRespond(api.delete(req.params.id), res);
     });
 
 
-
-    router.use('/_kue/', tt.kue.app);
+    router.use('/_kue/', kue.app);
 
 
     return router;
