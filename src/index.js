@@ -8,13 +8,16 @@ import RequestSchema from './schemas/Request';
 import api from './lib/api';
 import looper from './lib/looper';
 import scheduleChecker from './lib/schedule-checker';
+import requestProcessor from './lib/request-processor';
+import expressMiddleware from './middleware/express';
+import queueModule from './lib/queue';
 
 const mongoose = Promise.promisifyAll(require('mongoose'));
 
 const debug = require('debug')('dice:timeturner:index');
 
 export default function(opts) {
-    opts = _.defaultsDeep({
+    opts = _.merge({
         kue: {
             prefix: 'q',
             redis : {
@@ -34,22 +37,15 @@ export default function(opts) {
         autoStart  : true,
     }, opts);
 
+    debug('Starting with options:', opts);
+
     const {kue: kueOpts, mongodb, concurrency, interval, autoStart} = opts;
 
-    // init kue
-    const queue = kue.createQueue(kueOpts);
-
-    function getKueJobById(id) {
-        return new Promise((resolve, reject) => {
-            kue.Job.get(id, function(err, job){
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(job);
-                }
-            });
-        });
-    }
+    const queue = queueModule({
+        kue           : kueOpts,
+        concurrency   : concurrency,
+        processRequest: requestProcessor(),
+    })
 
     // init mongo
     const mongooseConnection = mongoose.createConnection(mongodb.url);
@@ -71,45 +67,22 @@ export default function(opts) {
         fn       : checkSchedule,
     });
 
-    // process jobs
-    let i = 0;
-    queue.process('request', concurrency, async function(job, done) {
-        i++;
-        setTimeout(function() {
-            if (i % 2) {
-                done(new Error('Something went wrong!'));
-            } else {
-                done();
-            }
-        }, _.random(1000, 5000));
-    });
 
-    function finishedJob(type) {
-        return async function(id, result) {
-            const job = await getKueJobById(id);
-
-            const {_id, method, url, body} = job.data;
-
-            debug(`${type} ${_id}: ${method} to ${url} with body ${JSON.stringify(body)}`);
-            apiClient.setState(_id, type);
-        };
+    function createExpressMiddleware() {
+        return expressMiddleware({
+            api: apiClient,
+            kue: kue,
+        });
     }
-
-    queue.on('job complete', finishedJob('SUCCESS'));
-    queue.on('job failed', finishedJob('FAIL'));
 
 
     return {
-        queue: queue,
-        kue  : kue,
+        kue : kue,
+        loop: loop,
+        api : apiClient,
 
-        start: loop.start,
-        stop : loop.stop,
+        RequestSchema: RequestSchema,
 
-        create: apiClient.create,
-        read  : apiClient.read,
-        update: apiClient.update,
-        delete: apiClient.delete,
-        readId: apiClient.readId,
+        expressMiddleware: createExpressMiddleware,
     };
 }
