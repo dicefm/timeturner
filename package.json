@@ -45,6 +45,7 @@
     "sinon": "^1.16.1",
     "sinon-chai": "^2.8.0",
     "chai-datetime": "^1.4.0",
+    "coveralls": "^2.11.4",
     "nock": "^2.10.0"
   },
   "dependencies": {
