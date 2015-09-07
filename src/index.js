@@ -37,7 +37,7 @@ export default function(opts) {
         autoStart  : true,
     }, opts);
 
-    debug('Starting with options:', opts);
+    debug('Creating timeturner with options:', opts);
 
     const {kue: kueOpts, mongodb, concurrency, interval, autoStart} = opts;
 
