@@ -5,7 +5,7 @@ import HTTPHeader from './HTTPHeader';
 import timestampPlugin from './plugins/timestamp';
 import headersPlugin from './plugins/headers';
 
-const SUPPORTED_HTTP_METHODS = ['GET', 'POST', 'PUT', 'DELETE'];
+const SUPPORTED_HTTP_METHODS = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
 const STATES = ['SCHEDULED', 'QUEING', 'QUEUED', 'SUCCESS', 'ERROR'];
 
 const Request = new Schema({
