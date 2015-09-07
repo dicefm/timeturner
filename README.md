@@ -2,7 +2,7 @@ Time turner
 =========================
 
 
-![time-turner](http://img08.deviantart.net/d868/i/2012/025/8/c/time_turner_3_by_jamieg09-d4ne7od.jpg)
+![timeturner](http://img08.deviantart.net/d868/i/2012/025/8/c/time_turner_3_by_jamieg09-d4ne7od.jpg)
 
 
 ## Dependencies / tools

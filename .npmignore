@@ -1,6 +1,6 @@
 .DS_Store
 *.log
-src
+*.spec.js
 test
 examples
 coverage
