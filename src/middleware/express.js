@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import express from 'express';
 
+import bodyParser from 'body-parser';
 import timeturner from '../index';
 
 const debug = require('debug')('dice:timeturner:express-middleware');
@@ -47,6 +48,8 @@ export default function(opts) {
     const {api, kue} = opts;
 
     const router = express.Router();
+
+    router.use(bodyParser.json());
 
     // create
     router.post('/', function(req, res, next) {
