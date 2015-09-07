@@ -20,7 +20,7 @@ export default function(opts) {
      * @return {bool}
      */
     async function assureAtomic(request) {
-        const {nModified} = await Request.updateAsync({
+        const raw = await Request.updateAsync({
             _id  : request._id,
             state: 'SCHEDULED',
         }, {
@@ -28,6 +28,8 @@ export default function(opts) {
                 state: 'QUEING',
             }
         });
+
+        const nModified = raw.nModified || raw.n; // support multiple mongo versions
 
         if (nModified !== 1) {
             return false;
@@ -84,7 +86,7 @@ export default function(opts) {
         for (const request of requests) {
             // 1. let delay = <time between now & when job should be run>
             // make sure atomic
-            const isAtomic = assureAtomic(request);
+            const isAtomic = await assureAtomic(request);
 
             if (!isAtomic) {
                 debug(`Some other job is fiddling with '${request._id}'. Skipping run.`);

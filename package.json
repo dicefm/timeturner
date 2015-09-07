@@ -7,7 +7,7 @@
     "clean": "rimraf build dist",
     "build": "babel src --out-dir build",
     "lint": "eslint src test",
-    "test": "NODE_ENV=test mocha",
+    "test": "DEBUG=dice* NODE_ENV=test mocha",
     "test:watch": "NODE_ENV=test mocha --watch",
     "test:cov": "babel-node ./node_modules/.bin/isparta cover ./node_modules/.bin/_mocha"
   },
@@ -45,7 +45,9 @@
     "sinon": "^1.16.1",
     "sinon-chai": "^2.8.0",
     "chai-datetime": "^1.4.0",
-    "coveralls": "^2.11.4"
+    "coveralls": "^2.11.4",
+    "nock": "^2.10.0",
+    "supertest-as-promised": "^2.0.2"
   },
   "dependencies": {
     "invariant": "^2.0.0",
@@ -57,6 +59,7 @@
     "bluebird": "^2.9.34",
     "moment": "^2.10.6",
     "he": "^0.5.0",
-    "request-promise": "^0.4.3"
+    "request-promise": "^0.4.3",
+    "cors": "^2.7.1"
   }
 }
