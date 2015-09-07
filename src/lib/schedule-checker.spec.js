@@ -75,7 +75,7 @@ describe('scheduleChecker', () => {
         beforeEach(asyncWithCallback(async () => {
             await Promise.all([
                 new Request({url: 'https://test.dice.fm/', date: new Date(), method: 'GET', state: 'SCHEDULED'}).saveAsync(),
-                new Request({url: 'https://test.dice.fm/', date: new Date(Date.now() + 1000), method: 'GET', state: 'SCHEDULED'}).saveAsync(),
+                new Request({url: 'https://test.dice.fm/', date: new Date(), method: 'GET', state: 'SCHEDULED'}).saveAsync(),
                 new Request({url: 'https://test.dice.fm/', date: new Date(), method: 'GET', state: 'QUEING'}).saveAsync(),
                 new Request({url: 'https://test.dice.fm/', date: new Date(), method: 'GET', state: 'QUEUED'}).saveAsync(),
                 new Request({url: 'https://test.dice.fm/', date: new Date(), method: 'GET', state: 'SUCCESS'}).saveAsync(),

@@ -7,7 +7,7 @@
     "clean": "rimraf build dist",
     "build": "babel src --out-dir build",
     "lint": "eslint src test",
-    "test": "NODE_ENV=test mocha",
+    "test": "DEBUG=dice* NODE_ENV=test mocha",
     "test:watch": "NODE_ENV=test mocha --watch",
     "test:cov": "babel-node ./node_modules/.bin/isparta cover ./node_modules/.bin/_mocha"
   },
