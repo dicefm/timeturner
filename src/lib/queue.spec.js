@@ -1,5 +1,8 @@
 import queueModule from './queue';
 
+const ObjectId = require('mongoose').Types.ObjectId;
+
+
 describe('queueModule', () => {
     let _queue;
 
@@ -40,8 +43,8 @@ describe('queueModule', () => {
         const {queue, kue, processRequest, concurrency, apiClient} = queueFactory({});
         _queue = queue;
 
-        const _id = '' + Math.random();
-        const data = {error: false, _id: _id};
+        const _id = new ObjectId().toString();
+        const data = {error: false, _id: _id, headers: {}};
         const job = queue
             .create('request', data)
             .save((err) => {
@@ -61,8 +64,8 @@ describe('queueModule', () => {
 
             done();
         }));
-        queue.on('job failed', done);
-        queue.on('error', done);
+        job.on('failed', done);
+        queue.on('error', done)
     });
 
     it('should fail jobs sometimes too', (done) => {
@@ -70,7 +73,7 @@ describe('queueModule', () => {
         _queue = queue;
 
         const _id = '' + Math.random();
-        const data = {error: true, _id: _id};
+        const data = {error: true, _id: _id, headers: {}};
         const job = queue
             .create('request', data)
             .save((err) => {
