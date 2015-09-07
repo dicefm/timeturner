@@ -5,8 +5,6 @@ import morgan from 'morgan';
 import url from 'url';
 import cors from 'cors';
 
-import bodyParser from 'body-parser';
-
 import timeturner from '../../src/index';
 
 const debug = require('debug')('dice:timeturner:express');
@@ -16,7 +14,6 @@ const {PORT, MONGO_URL, REDIS_HOST, REDIS_PORT, REDIS_PASSWORD} = process.env;
 const server = express();
 server.use(morgan('combined'));
 
-server.use(bodyParser.json());
 server.use(cors());
 
 let opts = {};
