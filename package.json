@@ -1,15 +1,17 @@
 {
   "name": "timeturner",
-  "version": "0.0.0",
+  "version": "0.1.2",
   "description": "",
-  "main": "lib/index.js",
+  "main": "build/index.js",
   "scripts": {
     "clean": "rimraf build dist",
     "build": "babel src --out-dir build",
     "lint": "eslint src test",
     "test": "DEBUG=dice* NODE_ENV=test mocha",
     "test:watch": "NODE_ENV=test mocha --watch",
-    "test:cov": "babel-node ./node_modules/.bin/isparta cover ./node_modules/.bin/_mocha"
+    "test:cov": "babel-node ./node_modules/.bin/isparta cover ./node_modules/.bin/_mocha",
+    "prepublish": "npm run build",
+    "install": "npm run build"
   },
   "repository": {
     "type": "git",
