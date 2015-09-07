@@ -1,9 +1,15 @@
+import _ from 'lodash';
 import kue from 'kue';
+import Promise from 'bluebird';
 
 const debug = require('debug')('dice:timeturner:kue');
 
 export default function(opts) {
-    const {kue: kueOpts, processRequest, concurrency} = opts;
+    opts = _.assign({
+        jobName: 'request',
+    }, opts);
+
+    const {kue: kueOpts, processRequest, concurrency, apiClient, jobName} = opts;
 
     // init kue
     const queue = kue.createQueue(kueOpts);
@@ -20,18 +26,21 @@ export default function(opts) {
         });
     }
 
-
     // process jobs
-    queue.process('request', concurrency, processRequest);
+    queue.process(jobName, concurrency, processRequest);
 
     function finishedJob(type) {
         return async function(id, result) {
-            const job = await getKueJobById(id);
+            try {
+                const job = await getKueJobById(id);
 
-            const {_id, method, url, body} = job.data;
+                const {_id, method, url, body} = job.data;
 
-            debug(`${type} ${_id}: ${method} to ${url} with body ${JSON.stringify(body)}`);
-            apiClient.setState(_id, type);
+                debug(`${type} ${_id}: ${method} to ${url} with body ${JSON.stringify(body)}`);
+                apiClient.setState(_id, type);
+            } catch (e) {
+                debug('Something went wrong!', e);
+            }
         };
     }
 
