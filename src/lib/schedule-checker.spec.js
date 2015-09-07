@@ -89,4 +89,34 @@ describe('scheduleChecker', () => {
             expect(queue.create).have.been.called.twice;
         }));
     });
+
+
+
+    describe('when a job\'s state gets changed externally while running', () => {
+        beforeEach(asyncWithCallback(async () => {
+            await Promise.all([
+                new Request({url: 'https://test.dice.fm/', date: new Date(), method: 'GET', state: 'SCHEDULED'}).saveAsync(),
+            ])
+        }));
+
+        it('should not run that job', asyncWithCallback(async () => {
+            // Make sure we change the job right after `read`
+            const read = apiClient.read.bind(apiClient)
+            apiClient.read = async function (...args) {
+                const res = await read.apply(this, args);
+
+                const query = args[0];
+
+                expect(res.length).to.be.above(0)
+
+                // mock another instance snatching the job straight after this one picked it up
+                const raw = await Request.updateAsync(query, {$set: {state: 'QUEUING'}});
+
+                return res;
+            }
+            await checkSchedule();
+
+            expect(queue.create).not.have.been.called.once;
+        }));
+    });
 });

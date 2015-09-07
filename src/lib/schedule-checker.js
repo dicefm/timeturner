@@ -84,7 +84,7 @@ export default function(opts) {
         for (const request of requests) {
             // 1. let delay = <time between now & when job should be run>
             // make sure atomic
-            const isAtomic = assureAtomic(request);
+            const isAtomic = await assureAtomic(request);
 
             if (!isAtomic) {
                 debug(`Some other job is fiddling with '${request._id}'. Skipping run.`);
