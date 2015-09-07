@@ -20,7 +20,7 @@ export default function(opts) {
      * @return {bool}
      */
     async function assureAtomic(request) {
-        const {nModified} = await Request.updateAsync({
+        const raw = await Request.updateAsync({
             _id  : request._id,
             state: 'SCHEDULED',
         }, {
@@ -28,6 +28,8 @@ export default function(opts) {
                 state: 'QUEING',
             }
         });
+
+        const nModified = raw.nModified || raw.n; // support multiple mongo versions
 
         if (nModified !== 1) {
             return false;
