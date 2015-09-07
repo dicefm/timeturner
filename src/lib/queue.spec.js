@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import queueModule from './queue';
 
 describe('queueModule', () => {
