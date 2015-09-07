@@ -1,5 +1,3 @@
-import Promise from 'bluebird';
-
 const mongoose = Promise.promisifyAll(require('mongoose'));
 
 import scheduleChecker from './schedule-checker';
@@ -24,19 +22,38 @@ describe('scheduleChecker', () => {
         Request = db.model('Request', RequestSchema);
     });
 
-    after((done) => {
-        Request.remove({}, function() {
-            db.close();
-            done();
-        });
-    });
+    after(asyncWithCallback(async () => {
+        await Request.removeAsync({})
+        await db.closeAsync();
+    }));
+
+    class QueueMock {
+        constructor() {
+            for (const methodName of ['create', 'delay', 'save']) {
+                this[methodName] = sinon.spy(this[methodName]);
+            }
+        }
+        create() {
+            return this;
+        }
+
+        delay() {
+            return this;
+        }
+
+        save(done) {
+            _.defer(done);
+            return {
+                id: 'job' + _.random(0, 1000000)
+            };
+        }
+
+    }
 
     beforeEach(() => {
         apiClient = api({Request});
 
-        queueCreateSpy = sinon.spy();
-        queue = {create: queueCreateSpy};
-
+        queue = new QueueMock();
 
         checkSchedule = scheduleChecker({Request, apiClient, queue});
     });
@@ -45,17 +62,31 @@ describe('scheduleChecker', () => {
         expect(scheduleChecker).to.be.a.function;
     });
 
-    describe('checking schedule with nothing scheduled', () => {
-        it('nothing should run', async (done) => {
-            try {
-                await checkSchedule();
+    describe('when hecking schedule with nothing scheduled', () => {
+        it('nothing should run', asyncWithCallback(async () => {
+            await checkSchedule();
 
-                expect(queueCreateSpy).not.have.been.called.once;
+            expect(queue.create).not.have.been.called.once;
+        }));
+    });
 
-                done();
-            } catch (err) {
-                done(err);
-            }
-        });
+
+    describe('when checking schedule that has a few scheduled jobs', () => {
+        beforeEach(asyncWithCallback(async () => {
+            await Promise.all([
+                new Request({url: 'https://test.dice.fm/', date: new Date(), method: 'GET', state: 'SCHEDULED'}).saveAsync(),
+                new Request({url: 'https://test.dice.fm/', date: new Date(Date.now() + 1000), method: 'GET', state: 'SCHEDULED'}).saveAsync(),
+                new Request({url: 'https://test.dice.fm/', date: new Date(), method: 'GET', state: 'QUEING'}).saveAsync(),
+                new Request({url: 'https://test.dice.fm/', date: new Date(), method: 'GET', state: 'QUEUED'}).saveAsync(),
+                new Request({url: 'https://test.dice.fm/', date: new Date(), method: 'GET', state: 'SUCCESS'}).saveAsync(),
+                new Request({url: 'https://test.dice.fm/', date: new Date(), method: 'GET', state: 'ERROR'}).saveAsync(),
+            ])
+        }));
+
+        it('the jobs should run', asyncWithCallback(async () => {
+            await checkSchedule();
+
+            expect(queue.create).have.been.called.twice;
+        }));
     });
 });
