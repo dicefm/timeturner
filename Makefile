@@ -10,8 +10,10 @@ build:
 	npm run build
 
 run:
-	npm run test:watch
+	DEBUG=dice* npm run test:watch
 
+express:
+	DEBUG=dice* nodemon ./examples/express
 
 setup:
 	npm install
