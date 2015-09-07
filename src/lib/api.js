@@ -21,7 +21,7 @@ export default function(opts) {
     }
 
     async function findAll(query) {
-        const items = await Request.findAsync(query);
+        const items = await Request.findAsync(query, {}, { sort: { date: 1 } });
 
         return items;
     }
