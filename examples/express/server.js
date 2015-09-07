@@ -3,6 +3,7 @@
 import express from 'express';
 import morgan from 'morgan';
 import url from 'url';
+import cors from 'cors';
 
 import bodyParser from 'body-parser';
 
@@ -18,6 +19,7 @@ server.use(morgan('combined'));
 server.set('state namespace', 'App');
 
 server.use(bodyParser.json());
+server.use(cors());
 
 let opts = {};
 
