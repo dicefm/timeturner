@@ -31,12 +31,10 @@ Request.statics.editableFields = function() {
     ];
 };
 
-Request.options.toJSON = {
-    transform: function(doc, ret, options) {
-        delete ret.__v;
+Request.options.toJSON.transform = function(doc, ret, options) {
+    delete ret.__v;
 
-        return ret;
-    }
+    return ret;
 };
 
 Request.statics.toJSON = function(docs, callback) {
