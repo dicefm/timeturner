@@ -18,6 +18,12 @@ function headersValidator(headers) {
 }
 
 export default function(schema, opts) {
+    schema.options.toObject = schema.options.toObject || {};
+    schema.options.toJSON = schema.options.toJSON || {};
+
+    schema.options.toObject.minimize = false;
+    schema.options.toJSON.minimize = false;
+
     schema.add({
         headers: {type: Schema.Types.Mixed, required: true, default: {}, validate: headersValidator},
     });

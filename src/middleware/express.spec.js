@@ -38,7 +38,7 @@ describe('expressMiddleware', () => {
 
         let entry;
 
-        it('should create it successfully', asyncWithCallback(async () => {
+        before(asyncWithCallback(async () => {
             const date = new Date();
             const {body, statusCode} = await req.post('/schedule').send({
                 method: 'GET',
@@ -50,6 +50,7 @@ describe('expressMiddleware', () => {
             expect(body).to.be.an('object');
 
             expect(body._id).to.be.a('string');
+            expect(body.headers).to.be.an('object');
 
             entry = body;
             id = body._id;
