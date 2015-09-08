@@ -38,6 +38,24 @@ describe('headersPlugin', () => {
         expect(headersPlugin).to.be.a.function;
     });
 
+
+    describe('when using on a schema w/ options', () => {
+        let SimpleSchemaWithOptions;
+        before(() => {
+            SimpleSchemaWithOptions = new Schema({
+                name: String,
+            });
+            SimpleSchemaWithOptions.options.toObject = {foo: 'bar'};
+            SimpleSchemaWithOptions.options.toJSON = {foo: 'bar'};
+        })
+        it('should not override the default ones', () => {
+            SimpleSchemaWithOptions.plugin(headersPlugin);
+
+            expect(SimpleSchemaWithOptions.options.toObject.foo).to.eq('bar');
+            expect(SimpleSchemaWithOptions.options.toJSON.foo).to.eq('bar');
+        });
+    });
+
     describe('when validating', () => {
         it('should only allow objects for headers', () => {
             entry.headers = [];
@@ -75,5 +93,45 @@ describe('headersPlugin', () => {
                 done();
             });
         });
+    });
+
+    describe('when doing toObject', () => {
+        it('should show the headers', asyncWithCallback(async () => {
+            entry.headers = {
+                Authorization: 'yo',
+            };
+            await entry.saveAsync();
+            expect(entry.toObject().headers).to.deep.eq({
+                authorization: 'yo',
+            });
+        }));
+
+        it('or the default value if there was none', asyncWithCallback(async () => {
+            let results = await entry.saveAsync();
+
+            entry = await SimpleModel.findByIdAsync(results[0]);
+
+            expect(entry.toObject().headers).to.deep.eq({});
+        }));
+    });
+
+    describe('when doing toJSON', () => {
+        it('should show the headers', asyncWithCallback(async () => {
+            entry.headers = {
+                Authorization: 'yo',
+            };
+            await entry.saveAsync();
+            expect(entry.toJSON().headers).to.deep.eq({
+                authorization: 'yo',
+            });
+        }));
+
+        it('or the default value if there was none', asyncWithCallback(async () => {
+            let results = await entry.saveAsync();
+
+            entry = await SimpleModel.findByIdAsync(results[0]);
+
+            expect(entry.toJSON().headers).to.deep.eq({});
+        }));
     });
 });
