@@ -2,6 +2,12 @@ Time turner
 =========================
 
 
+[![NPM version](https://badge.fury.io/js/timeturner.svg)](http://badge.fury.io/js/timeturner)
+[![Build Status](https://img.shields.io/travis/dicefm/timeturner.svg)](https://travis-ci.org/dicefm/timeturner)
+[![Coverage Status](https://img.shields.io/coveralls/dicefm/timeturner.svg)](https://coveralls.io/r/dicefm/timeturner?branch=master)
+[![Dependency Status](https://img.shields.io/david/dicefm/timeturner.svg)](https://david-dm.org/dicefm/timeturner)
+[![devDependency Status](https://img.shields.io/david/dev/dicefm/timeturner.svg)](https://david-dm.org/dicefm/timeturner#info=devDependencies)
+
 ![timeturner](http://img08.deviantart.net/d868/i/2012/025/8/c/time_turner_3_by_jamieg09-d4ne7od.jpg)
 
 
