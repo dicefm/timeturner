@@ -31,7 +31,6 @@ describe('headersPlugin', () => {
 
     beforeEach(() => {
         entry = new SimpleModel();
-        entry.headers = {};
     });
 
     it('should be a function', () => {
@@ -53,6 +52,25 @@ describe('headersPlugin', () => {
 
             expect(SimpleSchemaWithOptions.options.toObject.foo).to.eq('bar');
             expect(SimpleSchemaWithOptions.options.toJSON.foo).to.eq('bar');
+        });
+    });
+
+    describe('when creating entry', () => {
+        it('should have a default value', () => {
+            expect(entry.headers).to.deep.eq({});
+            expect(entry.toObject().headers).to.deep.eq({});
+        });
+        it('that is unique per instance', () => {
+            let entry2 = new SimpleModel();
+
+            expect(entry.headers).to.not.eq(entry2.headers);
+
+            entry2.headers.foo = 'bar';
+
+            expect(entry.headers).to.not.deep.eq(entry2.headers);
+            expect(entry.toObject().headers).to.not.deep.eq(entry2.toObject().headers);
+            expect(entry2.toObject().headers).to.deep.eq({foo: 'bar'});
+            expect(entry.toObject().headers).to.deep.eq({});
         });
     });
 
