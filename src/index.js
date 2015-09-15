@@ -86,6 +86,7 @@ export default function(opts) {
         queue: queue,
 
         RequestSchema: RequestSchema,
+        RequestModel : Request,
 
         expressMiddleware: createExpressMiddleware,
     };
