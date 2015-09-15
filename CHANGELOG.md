@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## 0.1.5 (2015-09-15)
+
+* :sparkles: timeturner exposing `RequestModel`
+* :white_check_mark: add tests for timeturner exports
+
+
 ## 0.1.4 (2015-09-10)
 
 * Remove install hook
