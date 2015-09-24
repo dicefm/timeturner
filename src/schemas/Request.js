@@ -15,6 +15,7 @@ const Request = new Schema({
     body  : {type: Schema.Types.Mixed },
     state : {type: String, enum: STATES, required: true, default: 'SCHEDULED' },
     job_id: {type: String},
+    notes : {type: Schema.Types.Mixed},
 });
 
 Request.plugin(timestampPlugin);
@@ -28,6 +29,7 @@ Request.statics.editableFields = function() {
         'method',
         'body',
         'headers',
+        'notes',
     ];
 };
 
