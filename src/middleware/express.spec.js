@@ -8,8 +8,8 @@ describe('expressMiddleware', () => {
     let tt;
     let req;
 
-    const uniqueUrl = `https://test.dice.fm/?${Math.random()}`;
-    const uniqueUrl2 = `https://test.dice.fm/?${Math.random()}`;
+    const uniqueUrl = `https://test.dice.fm/?before${Math.random()}`;
+    const uniqueUrl2 = `https://test.dice.fm/?after${Math.random()}`;
     let createdItem;
 
     beforeEach(() => {
@@ -75,15 +75,21 @@ describe('expressMiddleware', () => {
         }));
 
         describe('and trying to update it', () => {
-            it('should be able to update it', asyncWithCallback(async () => {
-                const date = new Date();
-                const {body, statusCode} = await req.patch(`/schedule/${id}`, {name: uniqueUrl2});
+            let patchRes;
+            before(asyncWithCallback(async () => {
+                patchRes = await req.patch(`/schedule/${id}`).send({url: uniqueUrl2});
+            }));
 
-                expect(statusCode).to.eq(200);
+            it('should get expected response when updating it', asyncWithCallback(async () => {
+                const {body, statusCode} = patchRes;
 
-                entry.url = uniqueUrl2;
+                expect(body.url).to.eq(uniqueUrl2);
+            }));
 
-                expect(body).to.deep.eq(body);
+            it('should get expected response when fetching the event afterwards', asyncWithCallback(async () => {
+                const {body, statusCode} = await req.get(`/schedule/${id}`);
+
+                expect(body.url).to.eq(uniqueUrl2);
             }));
         });
 
