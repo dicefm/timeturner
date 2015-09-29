@@ -12,35 +12,31 @@ describe('queueModule', () => {
         };
     }
 
-    function queueFactory(opts) {
-        let {kue, processRequest, concurrency, apiClient} = opts;
-        if (!apiClient) {
-            apiClient = {
-                setState: sinon.spy(),
-            };
-        }
-        if (!concurrency) {
-            concurrency = 5;
-        }
-        if (!processRequest) {
-            processRequest = function(job, done) {
-                let err;
-                if (job.data.error) {
-                    err = new Error('Something went wrong!');
-                }
-                done(err);
+    function queueFactory() {
+        const kue = {
+            prefix: 'q' + Math.random(),
+        };
+        const apiClient = {
+            setState: sinon.spy(),
+        };
+        const concurrency = 5;
+        let processRequest = function(job, done) {
+            let err;
+            if (job.data.error) {
+                err = new Error('Something went wrong!');
             }
+            done(err);
         }
 
         processRequest = sinon.spy(processRequest);
 
-        let queue = queueModule({kue, processRequest, concurrency, apiClient});
+        const queue = queueModule({kue, processRequest, concurrency, apiClient});
 
         return {queue, kue, processRequest, concurrency, apiClient};
     }
 
     it('should run jobs successfully', (done) => {
-        const {queue, kue, processRequest, concurrency, apiClient} = queueFactory({});
+        const {queue, kue, processRequest, concurrency, apiClient} = queueFactory();
         _queue = queue;
 
         const _id = new ObjectId().toString();
@@ -69,7 +65,7 @@ describe('queueModule', () => {
     });
 
     it('should fail jobs sometimes too', (done) => {
-        const {queue, kue, processRequest, concurrency, apiClient} = queueFactory({});
+        const {queue, kue, processRequest, concurrency, apiClient} = queueFactory();
         _queue = queue;
 
         const _id = '' + Math.random();

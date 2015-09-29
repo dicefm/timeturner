@@ -5,7 +5,7 @@ export default function(opts) {
 
     async function updateRequest(request, data) {
         data = _.pick(data, Request.editableFields());
-        _.defaultsDeep(request, data);
+        _.assign(request, data);
 
         await request.saveAsync();
 
