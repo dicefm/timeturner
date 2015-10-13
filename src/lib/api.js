@@ -1,10 +1,10 @@
 import _ from 'lodash';
 
 export default function(opts) {
-    const {Request} = opts;
+    const {RequestModel} = opts;
 
     async function updateRequest(request, data) {
-        data = _.pick(data, Request.editableFields());
+        data = _.pick(data, RequestModel.editableFields());
         _.assign(request, data);
 
         await request.saveAsync();
@@ -13,7 +13,7 @@ export default function(opts) {
     }
 
     async function create(data) {
-        let request = new Request();
+        let request = new RequestModel();
 
         await updateRequest(request, data);
 
@@ -21,15 +21,15 @@ export default function(opts) {
     }
 
     async function findAll(query) {
-        const items = await Request.findAsync(query, {}, { sort: { date: 1 } });
+        const items = await RequestModel.findAsync(query, {}, { sort: { date: 1 } });
         return items;
     }
 
     async function findOneById(id) {
-        const item = await Request.findByIdAsync(id);
+        const item = await RequestModel.findByIdAsync(id);
 
         if (!item) {
-            let error = new Error(`Request with id '${id}' not found.`);
+            let error = new Error(`RequestModel with id '${id}' not found.`);
             error.statusCode = 404;
             throw error;
         }
@@ -49,11 +49,11 @@ export default function(opts) {
         // ensure it exists or throw error
         await findOneById(id);
 
-        await Request.removeAsync({_id: id});
+        await RequestModel.removeAsync({_id: id});
     }
 
     async function setState(id, {state, error}) {
-        await Request.updateAsync({
+        await RequestModel.updateAsync({
             _id: id,
         }, {
             $set: {

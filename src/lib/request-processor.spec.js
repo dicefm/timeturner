@@ -2,7 +2,7 @@ import nock from 'nock';
 import requestProcessor from './request-processor';
 
 describe('requestProcessor', () => {
-    const processRequest = requestProcessor();
+    const processJob = requestProcessor();
 
     beforeEach(() => {
         nock('https://api-test.dice.fm')
@@ -35,7 +35,7 @@ describe('requestProcessor', () => {
             data: data
         };
 
-        const {statusCode, body} = await processRequest(job);
+        const {statusCode, body} = await processJob(job);
 
         expect(statusCode).to.eq(200);
         expect(body).to.eq('foo bar');
@@ -53,7 +53,7 @@ describe('requestProcessor', () => {
             data: data
         };
 
-        const {statusCode, body} = await processRequest(job);
+        const {statusCode, body} = await processJob(job);
 
         expect(statusCode).to.eq(200);
         expect(body).to.deep.eq({
@@ -74,7 +74,7 @@ describe('requestProcessor', () => {
             data: data
         };
         try {
-            await processRequest(job);
+            await processJob(job);
         } catch (err) {
             expect(err).to.be.ok;
             expect(err.name).to.eq('StatusCodeError');

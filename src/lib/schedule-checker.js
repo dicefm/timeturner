@@ -5,22 +5,22 @@ const debug = require('debug')('dice:timeturner:schedule-checker');
 
 export default function(opts) {
     opts = _.assign({
-        Request  : null,
-        apiClient: null,
-        interval : 500,
-        queue    : null,
+        RequestModel: null,
+        apiClient   : null,
+        interval    : 500,
+        enqueue     : null,
     }, opts);
 
-    const {Request, apiClient, interval, queue} = opts;
+    const {RequestModel, apiClient, interval, enqueue} = opts;
 
     /**
      * Makes sure that request is an atomic operation by updating into a QUEUED state
      *
-     * @param  {Request} request
+     * @param  {RequestModel} request
      * @return {bool}
      */
     async function assureAtomic(request) {
-        const raw = await Request.updateAsync({
+        const raw = await RequestModel.updateAsync({
             _id  : request._id,
             state: 'SCHEDULED',
         }, {
@@ -54,14 +54,14 @@ export default function(opts) {
 
         await waitFor(delay);
 
-        queue.push(request.toObject());
+        enqueue(request.toObject());
     }
 
     // start checking for jobs
     return async function checkSchedule() {
         const endOfInterval = new Date(Date.now() + interval);
 
-        // 1. findAndUpdate {state: QUEUED} jobs to be executed
+        // 1. findAndUpdate SCHEDULED jobs to be executed
         const requests = await apiClient.read({
             state: 'SCHEDULED',
             date : {

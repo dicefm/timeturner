@@ -33,45 +33,49 @@ export default function(opts) {
     // init mongo
     const mongooseConnection = mongoose.createConnection(mongodb.url);
 
-    const Request = mongooseConnection.model('Request', RequestSchema);
+    const RequestModel = mongooseConnection.model('Request', RequestSchema);
 
-    const apiClient = api({Request: Request});
+    const apiClient = api({RequestModel});
 
     // init queue
     const queue = queueModule({
-        apiClient     : apiClient,
-        concurrency   : concurrency,
-        processRequest: requestProcessor(),
-    })
+        apiClient,
+        concurrency,
+
+        processJob: requestProcessor(),
+    });
+
+    const enqueue = queue.push;
 
     const checkSchedule = scheduleChecker({
-        Request  : Request,
-        apiClient: apiClient,
-        interval : interval,
-        queue    : queue,
+        RequestModel,
+        apiClient,
+        interval,
+        enqueue,
     });
 
     const loop = looper({
-        interval : interval,
-        autoStart: autoStart,
-        fn       : checkSchedule,
+        interval,
+        autoStart,
+
+        fn: checkSchedule,
     });
 
 
     function createExpressMiddleware() {
         return expressMiddleware({
-            api: apiClient,
+            apiClient,
         });
     }
 
 
     return {
-        loop : loop,
-        api  : apiClient,
-        queue: queue,
+        loop,
+        apiClient,
+        queue,
 
-        RequestSchema: RequestSchema,
-        RequestModel : Request,
+        RequestSchema,
+        RequestModel,
 
         expressMiddleware: createExpressMiddleware,
     };

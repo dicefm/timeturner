@@ -17,21 +17,21 @@ describe('queueModule', () => {
             setState: sinon.spy(),
         };
         const concurrency = 5;
-        let processRequest = async function(job) {
+        let processJob = async function(job) {
             if (job.error) {
                 throw new Error('Something went wrong!');
             }
         }
 
-        processRequest = sinon.spy(processRequest);
+        processJob = sinon.spy(processJob);
 
-        const queue = queueModule({processRequest, concurrency, apiClient});
+        const queue = queueModule({processJob, concurrency, apiClient});
 
-        return {queue, processRequest, concurrency, apiClient};
+        return {queue, processJob, concurrency, apiClient};
     }
 
     it('should run jobs successfully', (done) => {
-        const {queue, processRequest, concurrency, apiClient} = queueFactory();
+        const {queue, processJob, concurrency, apiClient} = queueFactory();
         _queue = queue;
 
         const _id = new ObjectId().toString();
@@ -39,8 +39,8 @@ describe('queueModule', () => {
         queue.push(job, function(err) {
             expect(err).to.not.be.ok;
 
-            expect(processRequest).to.have.been.calledOnce;
-            expect(processRequest.args[0][0]).to.deep.eq(job);
+            expect(processJob).to.have.been.calledOnce;
+            expect(processJob.args[0][0]).to.deep.eq(job);
 
             expect(apiClient.setState).to.have.been.calledOnce;
             expect(apiClient.setState).to.have.been.calledWith(_id, {state: 'SUCCESS', error: null});
@@ -50,7 +50,7 @@ describe('queueModule', () => {
     });
 
     it('should fail jobs sometimes too', (done) => {
-        const {queue, processRequest, concurrency, apiClient} = queueFactory();
+        const {queue, processJob, concurrency, apiClient} = queueFactory();
         _queue = queue;
 
         const _id = new ObjectId().toString();
@@ -59,8 +59,8 @@ describe('queueModule', () => {
         queue.push(job, function(err) {
             expect(err).to.be.ok;
 
-            expect(processRequest).to.have.been.calledOnce;
-            expect(processRequest.args[0][0]).to.deep.eq(job);
+            expect(processJob).to.have.been.calledOnce;
+            expect(processJob.args[0][0]).to.deep.eq(job);
 
             expect(apiClient.setState).to.have.been.calledOnce;
             expect(apiClient.setState).to.have.been.calledWith(_id, {state: 'FAIL', error: new Error('Something went wrong!')});

@@ -8,7 +8,7 @@ export default function(opts) {
     opts = _.assign({
     }, opts);
 
-    const {processRequest, concurrency, apiClient, jobName} = opts;
+    const {processJob, concurrency, apiClient, jobName} = opts;
 
     async function worker(job, callback) {
         debug('working on job', job);
@@ -16,7 +16,7 @@ export default function(opts) {
         let error = null;
         try {
             _id = job._id;
-            await processRequest(job);
+            await processJob(job);
         } catch (_error) {
             debug('job failed', _error);
             error = _error;
