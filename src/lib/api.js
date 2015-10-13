@@ -52,12 +52,13 @@ export default function(opts) {
         await Request.removeAsync({_id: id});
     }
 
-    async function setState(id, state) {
+    async function setState(id, {state, error}) {
         await Request.updateAsync({
             _id: id,
         }, {
             $set: {
-                state: state,
+                state,
+                error,
             },
         });
     }
@@ -69,6 +70,6 @@ export default function(opts) {
         delete: deleteById,
         readId: findOneById,
 
-        setState: setState,
+        setState,
     };
 }

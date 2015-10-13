@@ -30,12 +30,17 @@ export default function(opts) {
         });
 
         const nModified = raw.nModified || raw.n; // support multiple mongo versions
-
         if (nModified !== 1) {
             return false;
         }
 
         return true;
+    }
+
+    function waitFor(ms) {
+        return new Promise((resolve, reject) => {
+            setTimeout(resolve, ms);
+        });
     }
 
     async function createJob(request) {
@@ -47,25 +52,9 @@ export default function(opts) {
             delay = 0;
         }
 
-        return new Promise((resolve, reject) => {
-            let jobOpts = request.toObject();
+        await waitFor(delay);
 
-            const {method, url} = jobOpts;
-
-            jobOpts.title = `${method} to ${url}`;
-
-            const job = queue
-                .create('request', jobOpts)
-                .delay(delay)
-                .save((err) => {
-                    if (err) {
-                        reject(err);
-                    } else {
-                        resolve(job);
-                    }
-                })
-                ;
-        });
+        queue.push(request.toObject());
     }
 
     // start checking for jobs
@@ -84,7 +73,7 @@ export default function(opts) {
 
         // 2. loop ->
         for (const request of requests) {
-            // 1. let delay = <time between now & when job should be run>
+            // let delay = <time between now & when job should be run>
             // make sure atomic
             const isAtomic = await assureAtomic(request);
 
@@ -93,13 +82,10 @@ export default function(opts) {
                 continue;
             }
 
-            // 2. pass to kue with `delay`
+            // pass to queue
             const job = await createJob(request);
 
-            // 3. set request.job_id
-            request.job_id = job.id;
-
-            // 4. set state to QUEUED
+            // set state to QUEUED
             request.state = 'QUEUED';
 
             await request.saveAsync();

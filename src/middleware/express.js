@@ -45,7 +45,7 @@ function failedOperationResponse(err, res) {
 
 
 export default function(opts) {
-    const {api, kue} = opts;
+    const {api} = opts;
 
     const router = express.Router();
 
@@ -74,9 +74,6 @@ export default function(opts) {
     router.delete('/:id', function(req, res, next) {
         performAndRespond(api.delete(req.params.id), res);
     });
-
-
-    router.use('/_kue/', kue.app);
 
 
     return router;

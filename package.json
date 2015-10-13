@@ -48,11 +48,11 @@
     "supertest-as-promised": "^2.0.2"
   },
   "dependencies": {
+    "async": "^1.4.2",
     "invariant": "^2.1.0",
     "lodash": "^3.10.1",
     "debug": "^2.2.0",
     "mongoose": "^4.1.6",
-    "kue": "^0.9.4",
     "jade": "^1.11.0",
     "bluebird": "^2.10.0",
     "moment": "^2.10.6",

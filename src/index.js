@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import kue from 'kue';
 import moment from 'moment';
 
 import Promise from 'bluebird';
@@ -18,17 +17,6 @@ const debug = require('debug')('dice:timeturner:index');
 
 export default function(opts) {
     opts = _.merge({
-        kue: {
-            prefix: 'q',
-            redis : {
-                host   : '127.0.0.1',
-                port   : 6379,
-                auth   : '',
-                options: {
-                    // see https://github.com/mranney/node_redis#rediscreateclient
-                }
-            }
-        },
         mongodb: {
             url: 'mongodb://127.0.0.1:27017/timeturner',
         },
@@ -39,7 +27,7 @@ export default function(opts) {
 
     debug('Creating timeturner with options:', opts);
 
-    const {kue: kueOpts, mongodb, concurrency, interval, autoStart} = opts;
+    const {mongodb, concurrency, interval, autoStart} = opts;
 
 
     // init mongo
@@ -51,7 +39,6 @@ export default function(opts) {
 
     // init queue
     const queue = queueModule({
-        kue           : kueOpts,
         apiClient     : apiClient,
         concurrency   : concurrency,
         processRequest: requestProcessor(),
@@ -74,13 +61,11 @@ export default function(opts) {
     function createExpressMiddleware() {
         return expressMiddleware({
             api: apiClient,
-            kue: kue,
         });
     }
 
 
     return {
-        kue  : kue,
         loop : loop,
         api  : apiClient,
         queue: queue,

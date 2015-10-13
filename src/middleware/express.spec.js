@@ -10,6 +10,7 @@ describe('expressMiddleware', () => {
 
     const uniqueUrl = `https://test.dice.fm/?before${Math.random()}`;
     const uniqueUrl2 = `https://test.dice.fm/?after${Math.random()}`;
+    const notes = {foo: 'bar'};
     let createdItem;
 
     beforeEach(() => {
@@ -44,6 +45,7 @@ describe('expressMiddleware', () => {
                 method: 'GET',
                 date  : date,
                 url   : uniqueUrl,
+                notes : notes,
             });
 
             expect(statusCode).to.eq(200);
@@ -51,6 +53,8 @@ describe('expressMiddleware', () => {
 
             expect(body._id).to.be.a('string');
             expect(body.headers).to.be.an('object');
+            expect(body).to.have.property('error');
+            expect(body.error).to.eq(null);
 
             entry = body;
             id = body._id;
@@ -91,6 +95,13 @@ describe('expressMiddleware', () => {
 
                 expect(body.url).to.eq(uniqueUrl2);
             });
+
+            it('should not have changed other properties', async () => {
+                const {body, statusCode} = await req.get(`/schedule/${id}`);
+
+                expect(body.notes).to.deep.eq(notes);
+            });
+
         });
 
         describe('and trying to delete it', () => {

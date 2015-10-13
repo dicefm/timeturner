@@ -9,7 +9,7 @@ import timeturner from '../../src/index';
 
 const debug = require('debug')('dice:timeturner:express');
 
-const {PORT, MONGO_URL, REDIS_HOST, REDIS_PORT, REDIS_PASSWORD} = process.env;
+const {PORT, MONGO_URL} = process.env;
 
 const server = express();
 server.use(morgan('combined'));
@@ -21,20 +21,6 @@ let opts = {};
 if (MONGO_URL) {
     opts.mongodb = {url: MONGO_URL};
 }
-
-opts.kue = {
-    redis: {}
-};
-if (REDIS_HOST) {
-    opts.kue.redis.host = REDIS_HOST;
-}
-if (REDIS_PORT) {
-    opts.kue.redis.port = REDIS_PORT;
-}
-if (REDIS_PASSWORD) {
-    opts.kue.redis.auth = REDIS_PASSWORD;
-}
-
 
 
 const tt = timeturner(opts);

@@ -16,6 +16,7 @@ const Request = new Schema({
     state : {type: String, enum: STATES, required: true, default: 'SCHEDULED' },
     job_id: {type: String},
     notes : {type: Schema.Types.Mixed},
+    error : {type: Schema.Types.Mixed, default: null},
 });
 
 Request.plugin(timestampPlugin);

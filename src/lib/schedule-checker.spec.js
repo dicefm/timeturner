@@ -22,38 +22,21 @@ describe('scheduleChecker', () => {
         Request = db.model('Request', RequestSchema);
     });
 
+    before(async () => {
+        await Request.removeAsync({})
+    });
+
     after(async () => {
         await Request.removeAsync({})
         await db.closeAsync();
     });
 
-    class QueueMock {
-        constructor() {
-            for (const methodName of ['create', 'delay', 'save']) {
-                this[methodName] = sinon.spy(this[methodName]);
-            }
-        }
-        create() {
-            return this;
-        }
-
-        delay() {
-            return this;
-        }
-
-        save(done) {
-            _.defer(done);
-            return {
-                id: 'job' + _.random(0, 1000000)
-            };
-        }
-
-    }
-
     beforeEach(() => {
         apiClient = api({Request});
 
-        queue = new QueueMock();
+        queue = {
+            push: sinon.spy(() => {}),
+        };
 
         checkSchedule = scheduleChecker({Request, apiClient, queue});
     });
@@ -66,7 +49,7 @@ describe('scheduleChecker', () => {
         it('nothing should run', async () => {
             await checkSchedule();
 
-            expect(queue.create).not.have.been.called.once;
+            expect(queue.push).not.have.been.called.once;
         });
     });
 
@@ -86,7 +69,7 @@ describe('scheduleChecker', () => {
         it('the jobs should run', async () => {
             await checkSchedule();
 
-            expect(queue.create).have.been.called.twice;
+            expect(queue.push).have.been.called.twice;
         });
     });
 
@@ -116,7 +99,7 @@ describe('scheduleChecker', () => {
             }
             await checkSchedule();
 
-            expect(queue.create).not.have.been.called.once;
+            expect(queue.push).not.have.been.called.once;
         });
     });
 });
