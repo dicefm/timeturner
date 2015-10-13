@@ -22,10 +22,10 @@ describe('scheduleChecker', () => {
         Request = db.model('Request', RequestSchema);
     });
 
-    after(asyncWithCallback(async () => {
+    after(async () => {
         await Request.removeAsync({})
         await db.closeAsync();
-    }));
+    });
 
     class QueueMock {
         constructor() {
@@ -63,16 +63,16 @@ describe('scheduleChecker', () => {
     });
 
     describe('when hecking schedule with nothing scheduled', () => {
-        it('nothing should run', asyncWithCallback(async () => {
+        it('nothing should run', async () => {
             await checkSchedule();
 
             expect(queue.create).not.have.been.called.once;
-        }));
+        });
     });
 
 
     describe('when checking schedule that has a few scheduled jobs', () => {
-        beforeEach(asyncWithCallback(async () => {
+        beforeEach(async () => {
             await Promise.all([
                 new Request({url: 'https://test.dice.fm/', date: new Date(), method: 'GET', state: 'SCHEDULED'}).saveAsync(),
                 new Request({url: 'https://test.dice.fm/', date: new Date(), method: 'GET', state: 'SCHEDULED'}).saveAsync(),
@@ -81,25 +81,25 @@ describe('scheduleChecker', () => {
                 new Request({url: 'https://test.dice.fm/', date: new Date(), method: 'GET', state: 'SUCCESS'}).saveAsync(),
                 new Request({url: 'https://test.dice.fm/', date: new Date(), method: 'GET', state: 'ERROR'}).saveAsync(),
             ])
-        }));
+        });
 
-        it('the jobs should run', asyncWithCallback(async () => {
+        it('the jobs should run', async () => {
             await checkSchedule();
 
             expect(queue.create).have.been.called.twice;
-        }));
+        });
     });
 
 
 
     describe('when a job\'s state gets changed externally while running', () => {
-        beforeEach(asyncWithCallback(async () => {
+        beforeEach(async () => {
             await Promise.all([
                 new Request({url: 'https://test.dice.fm/', date: new Date(), method: 'GET', state: 'SCHEDULED'}).saveAsync(),
             ])
-        }));
+        });
 
-        it('should not run that job', asyncWithCallback(async () => {
+        it('should not run that job', async () => {
             // Make sure we change the job right after `read`
             const read = apiClient.read.bind(apiClient)
             apiClient.read = async function (...args) {
@@ -117,6 +117,6 @@ describe('scheduleChecker', () => {
             await checkSchedule();
 
             expect(queue.create).not.have.been.called.once;
-        }));
+        });
     });
 });
