@@ -6,12 +6,6 @@ const ObjectId = require('mongoose').Types.ObjectId;
 describe('queueModule', () => {
     let _queue;
 
-    function deferred(fn) {
-        return function() {
-            setTimeout(fn, 10);
-        };
-    }
-
     function queueFactory() {
         const apiClient = {
             setState: sinon.spy(),

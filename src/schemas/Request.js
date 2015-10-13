@@ -40,10 +40,4 @@ Request.options.toJSON.transform = function(doc, ret, options) {
     return ret;
 };
 
-Request.statics.toJSON = function(docs, callback) {
-    return docs.map(function(doc) {
-        return doc.toJSON();
-    });
-};
-
 export default Request;

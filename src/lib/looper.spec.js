@@ -17,7 +17,6 @@ describe('looper', () => {
     }
 
     function clockTick(ms) {
-        ms = ms || 0;
         clock.tick(ms);
         return new Promise((resolve) => {
             resolve();
@@ -96,25 +95,31 @@ describe('looper', () => {
             clock.restore();
         });
 
-        it('should call `fn` once in every interval', async function(done) {
-            try {
-                loop.start();
+        it('should call `fn` once in every interval', async () => {
+            loop.start();
 
-                expect(spy).to.have.been.calledOnce;
+            expect(spy).to.have.been.calledOnce;
 
-                await clockTick(1);
-                await clockTick(interval);
+            await clockTick(1);
+            await clockTick(interval);
 
-                expect(spy).to.have.been.calledTwice;
+            expect(spy).to.have.been.calledTwice;
 
-                await clockTick(interval);
+            await clockTick(interval);
 
-                expect(spy).to.have.been.calledTrice;
+            expect(spy).to.have.been.calledTrice;
+        });
+        it('should stop and not be called again', async () => {
+            loop.start();
 
-                done();
-            } catch (e) {
-                done(e);
-            }
+            expect(spy).to.have.been.calledOnce;
+
+            loop.stop();
+
+            await clockTick(1);
+            await clockTick(interval);
+
+            expect(spy).to.have.been.calledOnce;
         });
     });
 
@@ -143,25 +148,19 @@ describe('looper', () => {
             clock.restore();
         });
 
-        it('shouldnt call `fn` if the first cycle isnt completed', async function(done) {
-            try {
-                loop.start();
+        it('shouldnt call `fn` if the first cycle isnt completed', async () => {
+            loop.start();
 
-                expect(spy).to.have.been.calledOnce;
+            expect(spy).to.have.been.calledOnce;
 
-                await clockTick(cycle-1);
+            await clockTick(cycle-1);
 
-                expect(spy).to.have.been.calledOnce;
+            expect(spy).to.have.been.calledOnce;
 
-                await clockTick(1);
-                await clockTick(1);
+            await clockTick(1);
+            await clockTick(1);
 
-                expect(spy).to.have.been.calledTwice;
-
-                done();
-            } catch (e) {
-                done(e);
-            }
+            expect(spy).to.have.been.calledTwice;
         });
     })
 });
