@@ -24,12 +24,12 @@ describe('expressMiddleware', () => {
         req = superTestAsPromised(server);
     });
 
-    it('should GET /', asyncWithCallback(async () => {
+    it('should GET /', async () => {
         const res = await req.get('/schedule');
 
         expect(res.statusCode).to.eq(200);
         expect(res.body).to.be.an('array');
-    }));
+    });
 
     describe(`when creating an item with a unique URL`, () => {
         const date = new Date();
@@ -38,7 +38,7 @@ describe('expressMiddleware', () => {
 
         let entry;
 
-        before(asyncWithCallback(async () => {
+        before(async () => {
             const date = new Date();
             const {body, statusCode} = await req.post('/schedule').send({
                 method: 'GET',
@@ -54,59 +54,59 @@ describe('expressMiddleware', () => {
 
             entry = body;
             id = body._id;
-        }));
+        });
 
-        it('should find it by /:id', asyncWithCallback(async () => {
+        it('should find it by /:id', async () => {
             const date = new Date();
             const {body, statusCode} = await req.get(`/schedule/${id}`);
 
             expect(statusCode).to.eq(200);
             expect(body).to.be.an('object');
             expect(body).to.deep.eq(entry);
-        }));
+        });
 
-        it('should find it by /?url=:url', asyncWithCallback(async () => {
+        it('should find it by /?url=:url', async () => {
             const date = new Date();
             const {body, statusCode} = await req.get(`/schedule/?url=${entry.url}`);
 
             expect(statusCode).to.eq(200);
             expect(body).to.be.an('array');
             expect(body).to.deep.eq([entry]);
-        }));
+        });
 
         describe('and trying to update it', () => {
             let patchRes;
-            before(asyncWithCallback(async () => {
+            before(async () => {
                 patchRes = await req.patch(`/schedule/${id}`).send({url: uniqueUrl2});
-            }));
+            });
 
-            it('should get expected response when updating it', asyncWithCallback(async () => {
+            it('should get expected response when updating it', async () => {
                 const {body, statusCode} = patchRes;
 
                 expect(body.url).to.eq(uniqueUrl2);
-            }));
+            });
 
-            it('should get expected response when fetching the event afterwards', asyncWithCallback(async () => {
+            it('should get expected response when fetching the event afterwards', async () => {
                 const {body, statusCode} = await req.get(`/schedule/${id}`);
 
                 expect(body.url).to.eq(uniqueUrl2);
-            }));
+            });
         });
 
         describe('and trying to delete it', () => {
-            it('should be deleted', asyncWithCallback(async () => {
+            it('should be deleted', async () => {
                 const date = new Date();
                 const {body, statusCode} = await req.delete(`/schedule/${id}`);
 
                 expect(statusCode).to.eq(204);
-            }));
+            });
 
-            it('and not found again', asyncWithCallback(async () => {
+            it('and not found again', async () => {
                 const date = new Date();
                 const {body, statusCode} = await req.get(`/schedule/${id}`);
 
                 expect(statusCode).to.eq(404);
-            }));
+            });
         })
     });
 

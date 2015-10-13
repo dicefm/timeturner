@@ -114,7 +114,7 @@ describe('headersPlugin', () => {
     });
 
     describe('when doing toObject', () => {
-        it('should show the headers', asyncWithCallback(async () => {
+        it('should show the headers', async () => {
             entry.headers = {
                 Authorization: 'yo',
             };
@@ -122,19 +122,19 @@ describe('headersPlugin', () => {
             expect(entry.toObject().headers).to.deep.eq({
                 authorization: 'yo',
             });
-        }));
+        });
 
-        it('or the default value if there was none', asyncWithCallback(async () => {
+        it('or the default value if there was none', async () => {
             let results = await entry.saveAsync();
 
             entry = await SimpleModel.findByIdAsync(results[0]);
 
             expect(entry.toObject().headers).to.deep.eq({});
-        }));
+        });
     });
 
     describe('when doing toJSON', () => {
-        it('should show the headers', asyncWithCallback(async () => {
+        it('should show the headers', async () => {
             entry.headers = {
                 Authorization: 'yo',
             };
@@ -142,14 +142,14 @@ describe('headersPlugin', () => {
             expect(entry.toJSON().headers).to.deep.eq({
                 authorization: 'yo',
             });
-        }));
+        });
 
-        it('or the default value if there was none', asyncWithCallback(async () => {
+        it('or the default value if there was none', async () => {
             let results = await entry.saveAsync();
 
             entry = await SimpleModel.findByIdAsync(results[0]);
 
             expect(entry.toJSON().headers).to.deep.eq({});
-        }));
+        });
     });
 });
