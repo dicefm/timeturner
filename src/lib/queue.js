@@ -38,7 +38,7 @@ export default function(opts) {
         } catch (_error) {
             debug('setState failed', _error);
 
-            events.emit('job:set-state:fail', {job, newState});
+            events.emit('job:set-state:fail', {job, newState, error: _error});
         }
 
         callback(error);
