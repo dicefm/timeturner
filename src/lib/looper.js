@@ -58,7 +58,7 @@ export default function(opts) {
     }
 
     return {
-        start: start,
-        stop : stop,
+        start,
+        stop,
     };
 }
