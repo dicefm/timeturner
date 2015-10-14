@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## 0.2.0 (2015-10-14)
+
+* :fire: remove kue & redis as dep (breaking change)
+* :art: refactor various things with some ES6+ sugar
+* :white_check_mark: 100% test coverage
+* :sparkles: event emitter on queue
+
+
 ## 0.1.7 (2015-09-29)
 
 * :bug: fix `PATCH` requests

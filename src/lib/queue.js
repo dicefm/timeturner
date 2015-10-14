@@ -1,52 +1,56 @@
+import async from 'async';
 import _ from 'lodash';
-import kue from 'kue';
-import Promise from 'bluebird';
+import {EventEmitter} from 'events';
 
-const debug = require('debug')('dice:timeturner:kue');
+const debug = require('debug')('dice:timeturner:queue');
 
 export default function(opts) {
     opts = _.assign({
-        jobName: 'request',
     }, opts);
 
-    const {kue: kueOpts, processRequest, concurrency, apiClient, jobName} = opts;
+    const {processJob, concurrency, apiClient, jobName} = opts;
 
-    // init kue
-    const queue = kue.createQueue(kueOpts);
+    const events = new EventEmitter();
 
-    function getKueJobById(id) {
-        return new Promise((resolve, reject) => {
-            kue.Job.get(id, function(err, job){
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(job);
-                }
-            });
-        });
+    async function worker(job, callback) {
+        debug('working on job', job);
+        let _id;
+        let error = null;
+        try {
+            events.emit('job:run:init', {job});
+
+            _id = job._id;
+            await processJob(job);
+            events.emit('job:run:success', {job});
+        } catch (_error) {
+            debug('job failed', _error);
+            error = _error;
+            events.emit('job:run:fail', {job, error});
+        }
+
+        const state = (error ? 'FAIL' : 'SUCCESS');
+
+        const newState = {state, error};
+        try {
+            events.emit('job:set-state:init', {job, newState});
+            await apiClient.setState(_id, newState);
+            events.emit('job:set-state:success', {job, newState});
+        } catch (_error) {
+            debug('setState failed', _error);
+
+            events.emit('job:set-state:fail', {job, newState, error: _error});
+        }
+
+        callback(error);
     }
 
-    // process jobs
-    queue.process(jobName, concurrency, processRequest);
+    // init queue
+    const queue = async.queue(worker, concurrency);
 
-    function finishedJob(type) {
-        return async function(id, result) {
-            try {
-                const job = await getKueJobById(id);
+    const {push} = queue;
 
-                const {_id, method, url, body} = job.data;
-
-                debug(`${type} ${_id}: ${method} to ${url} with body ${JSON.stringify(body)}`);
-                apiClient.setState(_id, type);
-            } catch (e) {
-                debug('Something went wrong!', e);
-            }
-        };
-    }
-
-    queue.on('job complete', finishedJob('SUCCESS'));
-    queue.on('job failed', finishedJob('FAIL'));
-
-
-    return queue;
+    return {
+        push,
+        events,
+    };
 };
