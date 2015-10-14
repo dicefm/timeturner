@@ -1,7 +1,7 @@
-import failedOperationResponse from './failed-operation-response';
+import formatMongooseError from './format-mongoose-error';
 
 
-describe('failedOperationResponse', () => {
+describe('formatMongooseError', () => {
     let clock;
     let res;
 
@@ -14,13 +14,13 @@ describe('failedOperationResponse', () => {
     });
 
     it('should be a function', () => {
-        expect(failedOperationResponse).to.be.a('function');
+        expect(formatMongooseError).to.be.a('function');
     });
 
     it('should default statusCode to 400', () => {
         const error = new Error();
 
-        const {statusCode, payload} = failedOperationResponse(error);
+        const {statusCode, payload} = formatMongooseError(error);
 
         expect(statusCode).to.eq(400);
     });
@@ -28,7 +28,7 @@ describe('failedOperationResponse', () => {
     it('should get message from error', () => {
         const error = new Error('hey');
 
-        const {statusCode, payload} = failedOperationResponse(error);
+        const {statusCode, payload} = formatMongooseError(error);
 
         expect(payload).to.deep.eq({description: 'hey'});
     });
@@ -37,7 +37,7 @@ describe('failedOperationResponse', () => {
         const error = new Error();
         error.statusCode = 418;
 
-        const {statusCode, payload} = failedOperationResponse(error);
+        const {statusCode, payload} = formatMongooseError(error);
 
         expect(statusCode).to.eq(418);
     });
@@ -48,7 +48,7 @@ describe('failedOperationResponse', () => {
             name: new Error('Invalid `name`'),
         };
 
-        const {statusCode, payload} = failedOperationResponse(error);
+        const {statusCode, payload} = formatMongooseError(error);
 
         expect(payload).to.deep.eq({
             description: 'Validation error',

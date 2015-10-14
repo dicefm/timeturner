@@ -1,4 +1,4 @@
-import failedOperationResponse from './failed-operation-response';
+import formatMongooseError from './format-mongoose-error';
 
 export default async function(promise, res) {
     try {
@@ -9,7 +9,7 @@ export default async function(promise, res) {
             res.send(data);
         }
     } catch (err) {
-        const {statusCode, payload} = failedOperationResponse(err);
+        const {statusCode, payload} = formatMongooseError(err);
         res.status(statusCode);
         res.send(payload);
     }
