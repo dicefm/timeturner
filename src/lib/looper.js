@@ -20,11 +20,8 @@ export default function(opts) {
 
     async function loop() {
         const timeStart = new Date().getUTCMilliseconds();
-        try {
-            await fn();
-        } catch (err) {
-            debug('Something went wrong in loop!', err);
-        }
+
+        await fn();
 
         const timeEnd = new Date().getUTCMilliseconds();
         const diff = (timeEnd - timeStart);
