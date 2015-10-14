@@ -1,4 +1,5 @@
 import formatMongooseError from './format-mongoose-error';
+import _ from 'lodash';
 
 export default async function(promise, res) {
     try {
