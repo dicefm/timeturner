@@ -6,9 +6,9 @@ const ObjectId = require('mongoose').Types.ObjectId;
 
 describe('queueModule', () => {
     const events = [
-        'job:init',
-        'job:success',
-        'job:fail',
+        'job:run:init',
+        'job:run:success',
+        'job:run:fail',
         'job:set-state:init',
         'job:set-state:success',
         'job:set-state:fail',
@@ -76,9 +76,9 @@ describe('queueModule', () => {
         });
 
         it('and emit events', () => {
-            expect(spies['job:init']).to.have.been.calledOnce;
-            expect(spies['job:success']).to.have.been.calledOnce;
-            expect(spies['job:fail']).not.have.been.called.once;
+            expect(spies['job:run:init']).to.have.been.calledOnce;
+            expect(spies['job:run:success']).to.have.been.calledOnce;
+            expect(spies['job:run:fail']).not.have.been.called.once;
 
             expect(spies['job:set-state:init']).to.have.been.calledOnce;
             expect(spies['job:set-state:success']).to.have.been.calledOnce;
@@ -123,9 +123,9 @@ describe('queueModule', () => {
         });
 
         it('and emit events', () => {
-            expect(spies['job:init']).to.have.been.calledOnce;
-            expect(spies['job:success']).to.have.been.calledOnce;
-            expect(spies['job:fail']).not.have.been.called.once;
+            expect(spies['job:run:init']).to.have.been.calledOnce;
+            expect(spies['job:run:success']).to.have.been.calledOnce;
+            expect(spies['job:run:fail']).not.have.been.called.once;
 
             expect(spies['job:set-state:init']).to.have.been.calledOnce;
             expect(spies['job:set-state:success']).not.have.been.called.once;
@@ -162,9 +162,9 @@ describe('queueModule', () => {
         });
 
         it('and emit events', () => {
-            expect(spies['job:init']).to.have.been.calledOnce;
-            expect(spies['job:success']).not.have.been.called.once;
-            expect(spies['job:fail']).to.have.been.calledOnce;
+            expect(spies['job:run:init']).to.have.been.calledOnce;
+            expect(spies['job:run:success']).not.have.been.called.once;
+            expect(spies['job:run:fail']).to.have.been.calledOnce;
 
             expect(spies['job:set-state:init']).to.have.been.calledOnce;
             expect(spies['job:set-state:success']).to.have.been.calledOnce;

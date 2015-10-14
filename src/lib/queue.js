@@ -17,15 +17,15 @@ export default function(opts) {
         let _id;
         let error = null;
         try {
-            events.emit('job:init', {job});
+            events.emit('job:run:init', {job});
 
             _id = job._id;
             await processJob(job);
-            events.emit('job:success', {job});
+            events.emit('job:run:success', {job});
         } catch (_error) {
             debug('job failed', _error);
             error = _error;
-            events.emit('job:fail', {job, error});
+            events.emit('job:run:fail', {job, error});
         }
 
         const state = (error ? 'FAIL' : 'SUCCESS');
