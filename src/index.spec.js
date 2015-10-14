@@ -10,20 +10,13 @@ describe('timeturner', () => {
         });
     });
 
-    after((done) => {
+    after(() => {
         tt.loop.stop();
-        tt.queue.shutdown(1000, done);
     });
 
     describe('should expose', () => {
         it('an object', () => {
             expect(tt).to.be.an('object');
-        });
-
-        it('kue', () => {
-            const {kue} = tt;
-
-            expect(kue).to.be.an.object;
         });
 
         it('loop', () => {
@@ -34,11 +27,11 @@ describe('timeturner', () => {
             expect(loop.stop).to.be.a('function');
         });
 
-        it('kue queue', () => {
+        it('queue', () => {
             const {queue} = tt;
 
             expect(queue).to.be.an('object');
-            expect(queue.create).to.be.a('function');
+            expect(queue.push).to.be.a('function');
         });
 
         it('RequestModel', () => {

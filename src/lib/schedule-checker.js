@@ -5,22 +5,22 @@ const debug = require('debug')('dice:timeturner:schedule-checker');
 
 export default function(opts) {
     opts = _.assign({
-        Request  : null,
-        apiClient: null,
-        interval : 500,
-        queue    : null,
+        RequestModel: null,
+        apiClient   : null,
+        interval    : 500,
+        enqueue     : null,
     }, opts);
 
-    const {Request, apiClient, interval, queue} = opts;
+    const {RequestModel, apiClient, interval, enqueue} = opts;
 
     /**
      * Makes sure that request is an atomic operation by updating into a QUEUED state
      *
-     * @param  {Request} request
+     * @param  {RequestModel} request
      * @return {bool}
      */
     async function assureAtomic(request) {
-        const raw = await Request.updateAsync({
+        const raw = await RequestModel.updateAsync({
             _id  : request._id,
             state: 'SCHEDULED',
         }, {
@@ -30,12 +30,17 @@ export default function(opts) {
         });
 
         const nModified = raw.nModified || raw.n; // support multiple mongo versions
-
         if (nModified !== 1) {
             return false;
         }
 
         return true;
+    }
+
+    function waitFor(ms) {
+        return new Promise((resolve, reject) => {
+            setTimeout(resolve, ms);
+        });
     }
 
     async function createJob(request) {
@@ -47,32 +52,16 @@ export default function(opts) {
             delay = 0;
         }
 
-        return new Promise((resolve, reject) => {
-            let jobOpts = request.toObject();
+        await waitFor(delay);
 
-            const {method, url} = jobOpts;
-
-            jobOpts.title = `${method} to ${url}`;
-
-            const job = queue
-                .create('request', jobOpts)
-                .delay(delay)
-                .save((err) => {
-                    if (err) {
-                        reject(err);
-                    } else {
-                        resolve(job);
-                    }
-                })
-                ;
-        });
+        enqueue(request.toObject());
     }
 
     // start checking for jobs
     return async function checkSchedule() {
         const endOfInterval = new Date(Date.now() + interval);
 
-        // 1. findAndUpdate {state: QUEUED} jobs to be executed
+        // 1. findAndUpdate SCHEDULED jobs to be executed
         const requests = await apiClient.read({
             state: 'SCHEDULED',
             date : {
@@ -84,7 +73,7 @@ export default function(opts) {
 
         // 2. loop ->
         for (const request of requests) {
-            // 1. let delay = <time between now & when job should be run>
+            // let delay = <time between now & when job should be run>
             // make sure atomic
             const isAtomic = await assureAtomic(request);
 
@@ -93,13 +82,10 @@ export default function(opts) {
                 continue;
             }
 
-            // 2. pass to kue with `delay`
+            // pass to queue
             const job = await createJob(request);
 
-            // 3. set request.job_id
-            request.job_id = job.id;
-
-            // 4. set state to QUEUED
+            // set state to QUEUED
             request.state = 'QUEUED';
 
             await request.saveAsync();

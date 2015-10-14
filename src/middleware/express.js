@@ -45,7 +45,7 @@ function failedOperationResponse(err, res) {
 
 
 export default function(opts) {
-    const {api, kue} = opts;
+    const {apiClient} = opts;
 
     const router = express.Router();
 
@@ -53,30 +53,27 @@ export default function(opts) {
 
     // create
     router.post('/', function(req, res, next) {
-        performAndRespond(api.create(req.body), res);
+        performAndRespond(apiClient.create(req.body), res);
     });
 
     // read
     router.get('/', function(req, res, next) {
-        performAndRespond(api.read(req.query), res);
+        performAndRespond(apiClient.read(req.query), res);
     });
 
     router.get('/:id', function(req, res, next) {
-        performAndRespond(api.readId(req.params.id), res);
+        performAndRespond(apiClient.readId(req.params.id), res);
     });
 
     // update
     router.patch('/:id', function(req, res, next) {
-        performAndRespond(api.update(req.params.id, req.body), res);
+        performAndRespond(apiClient.update(req.params.id, req.body), res);
     });
 
     // delete
     router.delete('/:id', function(req, res, next) {
-        performAndRespond(api.delete(req.params.id), res);
+        performAndRespond(apiClient.delete(req.params.id), res);
     });
-
-
-    router.use('/_kue/', kue.app);
 
 
     return router;
