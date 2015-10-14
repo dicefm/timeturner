@@ -1,13 +1,22 @@
 import queueModule from './queue';
+import {EventEmitter} from 'events';
 
 const ObjectId = require('mongoose').Types.ObjectId;
 
 
 describe('queueModule', () => {
-    let _queue;
+    const events = [
+        'job:run:init',
+        'job:run:success',
+        'job:run:fail',
+        'job:set-state:init',
+        'job:set-state:success',
+        'job:set-state:fail',
+    ];
 
-    function queueFactory() {
-        const apiClient = {
+    function queueFactory(opts = {}) {
+        let {apiClient} = opts;
+        apiClient = apiClient || {
             setState: sinon.spy(),
         };
         const concurrency = 5;
@@ -24,42 +33,142 @@ describe('queueModule', () => {
         return {queue, processJob, concurrency, apiClient};
     }
 
-    it('should run jobs successfully', (done) => {
+    it('should export `events`', () => {
         const {queue, processJob, concurrency, apiClient} = queueFactory();
-        _queue = queue;
 
+        expect(queue).to.have.property('events');
+        expect(queue.events).to.be.instanceof(EventEmitter);
+    });
+
+    it('should export `push`', () => {
+        const {queue, processJob, concurrency, apiClient} = queueFactory();
+
+        expect(queue).to.have.property('push');
+        expect(queue.push).to.be.a('function');
+    });
+
+    describe('queing a valid job', () => {
         const _id = new ObjectId().toString();
         const job = {error: false, _id: _id, headers: {}};
-        queue.push(job, function(err) {
-            expect(err).to.not.be.ok;
 
-            expect(processJob).to.have.been.calledOnce;
-            expect(processJob.args[0][0]).to.deep.eq(job);
+        const spies = {};
 
-            expect(apiClient.setState).to.have.been.calledOnce;
-            expect(apiClient.setState).to.have.been.calledWith(_id, {state: 'SUCCESS', error: null});
+        const {queue, processJob, concurrency, apiClient} = queueFactory();
 
-            done();
+        events.forEach((name) => {
+            spies[name] = sinon.spy()
+            queue.events.on(name, spies[name]);
+        });
+
+
+        it('should succeed', (done) => {
+            queue.push(job, function(err) {
+                expect(err).to.not.be.ok;
+
+                expect(processJob).to.have.been.calledOnce;
+                expect(processJob.args[0][0]).to.deep.eq(job);
+
+                expect(apiClient.setState).to.have.been.calledOnce;
+                expect(apiClient.setState).to.have.been.calledWith(_id, {state: 'SUCCESS', error: null});
+
+                done();
+            });
+        });
+
+        it('and emit events', () => {
+            expect(spies['job:run:init']).to.have.been.calledOnce;
+            expect(spies['job:run:success']).to.have.been.calledOnce;
+            expect(spies['job:run:fail']).not.have.been.called.once;
+
+            expect(spies['job:set-state:init']).to.have.been.calledOnce;
+            expect(spies['job:set-state:success']).to.have.been.calledOnce;
+            expect(spies['job:set-state:fail']).not.have.been.called.once;
         });
     });
 
-    it('should fail jobs sometimes too', (done) => {
-        const {queue, processJob, concurrency, apiClient} = queueFactory();
-        _queue = queue;
 
+
+    describe('queing a valid job w/ invalid apiClient', () => {
+        const _id = new ObjectId().toString();
+        const job = {error: false, _id: _id, headers: {}};
+
+        const spies = {};
+
+        const {queue, processJob, concurrency, apiClient} = queueFactory({
+            apiClient: {
+                setState: sinon.spy(() => {
+                    throw new Error('Saving failed!');
+                }),
+            }
+        });
+
+        events.forEach((name) => {
+            spies[name] = sinon.spy()
+            queue.events.on(name, spies[name]);
+        });
+
+
+        it('should succeed', (done) => {
+            queue.push(job, function(err) {
+                expect(err).to.not.be.ok;
+
+                expect(processJob).to.have.been.calledOnce;
+                expect(processJob.args[0][0]).to.deep.eq(job);
+
+                expect(apiClient.setState).to.have.been.calledOnce;
+                expect(apiClient.setState).to.have.been.calledWith(_id, {state: 'SUCCESS', error: null});
+
+                done();
+            });
+        });
+
+        it('and emit events', () => {
+            expect(spies['job:run:init']).to.have.been.calledOnce;
+            expect(spies['job:run:success']).to.have.been.calledOnce;
+            expect(spies['job:run:fail']).not.have.been.called.once;
+
+            expect(spies['job:set-state:init']).to.have.been.calledOnce;
+            expect(spies['job:set-state:success']).not.have.been.called.once;
+            expect(spies['job:set-state:fail']).to.have.been.calledOnce;
+        });
+    });
+
+
+    describe('queing an invalid job', () => {
         const _id = new ObjectId().toString();
         const job = {error: true, _id: _id, headers: {}};
 
-        queue.push(job, function(err) {
-            expect(err).to.be.ok;
+        const spies = {};
 
-            expect(processJob).to.have.been.calledOnce;
-            expect(processJob.args[0][0]).to.deep.eq(job);
+        const {queue, processJob, concurrency, apiClient} = queueFactory();
 
-            expect(apiClient.setState).to.have.been.calledOnce;
-            expect(apiClient.setState).to.have.been.calledWith(_id, {state: 'FAIL', error: new Error('Something went wrong!')});
+        events.forEach((name) => {
+            spies[name] = sinon.spy()
+            queue.events.on(name, spies[name]);
+        });
 
-            done();
+        it('should fail', (done) => {
+            queue.push(job, function(err) {
+                expect(err).to.be.ok;
+
+                expect(processJob).to.have.been.calledOnce;
+                expect(processJob.args[0][0]).to.deep.eq(job);
+
+                expect(apiClient.setState).to.have.been.calledOnce;
+                expect(apiClient.setState).to.have.been.calledWith(_id, {state: 'FAIL', error: new Error('Something went wrong!')});
+
+                done();
+            });
+        });
+
+        it('and emit events', () => {
+            expect(spies['job:run:init']).to.have.been.calledOnce;
+            expect(spies['job:run:success']).not.have.been.called.once;
+            expect(spies['job:run:fail']).to.have.been.calledOnce;
+
+            expect(spies['job:set-state:init']).to.have.been.calledOnce;
+            expect(spies['job:set-state:success']).to.have.been.calledOnce;
+            expect(spies['job:set-state:fail']).not.have.been.called.once;
         });
     });
 });

@@ -6,12 +6,17 @@ describe('looper', () => {
     let asyncFn;
     let clock;
 
-    function refreshSpy() {
+    function refreshSpy(opts = {}) {
+        const {error} = opts;
         spy = sinon.spy();
         asyncFn = function() {
-            return new Promise(function(resolve) {
+            return new Promise((resolve, reject) => {
                 spy();
-                resolve();
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve();
+                }
             });
         };
     }
@@ -51,6 +56,22 @@ describe('looper', () => {
                         fn: null,
                     });
                 }).to.throw(`'opts.fn' needs to be a function. ${typeof null} received`);
+            });
+        });
+
+        describe('with function `fn` throwing error', () => {
+            beforeEach(() => {
+                refreshSpy({
+                    error: new Error('ERROR'),
+                });
+            });
+            afterEach(() => {
+                loop.stop();
+            });
+            it('should not crash', () => {
+                loop = looper({
+                    fn: asyncFn,
+                });
             });
         });
 
