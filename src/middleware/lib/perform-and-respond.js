@@ -1,24 +1,4 @@
-/**
- * Takes an error object from a mongoose `save()` call and sends a digestable output to client
- */
-function failedOperationResponse(err, res) {
-    const statusCode = err.statusCode || 400;
-    res.status(statusCode);
-
-    let ret = {
-        description: err.message,
-    };
-
-    if (err.errors) {
-        let errors = {};
-        for (let key in err.errors) {
-            errors[key] = err.errors[key].message;
-        }
-        ret.errors = errors;
-    }
-    res.send(ret);
-}
-
+import failedOperationResponse from './failed-operation-response';
 
 export default async function(promise, res) {
     try {
@@ -29,6 +9,8 @@ export default async function(promise, res) {
             res.send(data);
         }
     } catch (err) {
-        failedOperationResponse(err, res);
+        const {statusCode, payload} = failedOperationResponse(err);
+        res.status(statusCode);
+        res.send(payload);
     }
 }

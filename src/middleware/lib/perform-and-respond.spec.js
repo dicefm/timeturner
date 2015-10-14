@@ -77,4 +77,24 @@ describe('performAndRespond', () => {
 
         expect(res.send).calledWith({foo: 'bar'});
     });
+
+
+    it('should await a promise & return errors', async () => {
+        performAndRespond(waitFor(10, {error: new Error('msg')}), res);
+
+        await clockTick(5);
+
+        expect(res.send).not.have.been.called.once;
+        expect(res.status).not.have.been.called.once;
+        expect(res.sendStatus).not.have.been.called.once;
+
+        await clockTick(6);
+
+        expect(res.sendStatus).not.have.been.called.once;
+
+        expect(res.status).to.have.been.called.once;
+        expect(res.send).to.have.been.called.once;
+
+        expect(res.send).calledWith({description: 'msg'});
+    });
 });
