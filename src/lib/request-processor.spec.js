@@ -26,13 +26,10 @@ describe('requestProcessor', () => {
 
 
     it('should perform requests', async () => {
-        const data = {
+        const job = {
             url    : 'https://api-test.dice.fm/200',
             method : 'GET',
             headers: {},
-        };
-        const job = {
-            data: data
         };
 
         const {statusCode, body} = await processJob(job);
@@ -42,15 +39,12 @@ describe('requestProcessor', () => {
     });
 
     it('should perform JSON requests', async () => {
-        const data = {
+        const job = {
             url    : 'https://api-test.dice.fm/json/200',
             method : 'GET',
             headers: {
                 'content-type': 'application/json',
             },
-        };
-        const job = {
-            data: data
         };
 
         const {statusCode, body} = await processJob(job);
@@ -63,15 +57,12 @@ describe('requestProcessor', () => {
     });
 
     it('should throw errors', async () => {
-        const data = {
+        const job = {
             url    : 'https://api-test.dice.fm/json/418',
             method : 'GET',
             headers: {
                 'content-type': 'application/json',
             },
-        };
-        const job = {
-            data: data
         };
         try {
             await processJob(job);
