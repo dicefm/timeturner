@@ -1,3 +1,4 @@
+import Promise from 'bluebird';
 import performAndRespond from './perform-and-respond';
 
 
@@ -27,6 +28,7 @@ describe('performAndRespond', () => {
             resolve();
         });
     }
+
     function waitFor(ms, opts = {}) {
         const {error, payload} = opts;
         return new Promise((resolve, reject) => {

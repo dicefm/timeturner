@@ -1,3 +1,4 @@
+import Promise from 'bluebird';
 const mongoose = Promise.promisifyAll(require('mongoose'));
 
 import scheduleChecker from './schedule-checker';
