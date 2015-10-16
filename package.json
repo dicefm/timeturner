@@ -1,6 +1,6 @@
 {
   "name": "timeturner",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "",
   "main": "build/index.js",
   "scripts": {
@@ -51,6 +51,7 @@
     "async": "^1.4.2",
     "bluebird": "^2.10.2",
     "body-parser": "^1.14.1",
+    "continuation-local-storage": "^3.1.4",
     "cors": "^2.7.1",
     "debug": "^2.2.0",
     "express": "^4.13.3",
@@ -60,6 +61,6 @@
     "lodash": "^3.10.1",
     "moment": "^2.10.6",
     "mongoose": "^4.1.6",
-    "request-promise": "^0.4.3"
+    "request-promise": "^1.0.1"
   }
 }
