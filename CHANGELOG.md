@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## 0.2.1 (2015-10-16)
+
+* :bug: critical bug fixes in `request-processor`
+
+
 ## 0.2.0 (2015-10-14)
 
 * :fire: remove kue & redis as dep (breaking change)
