@@ -1,8 +1,8 @@
-import timeturner from '../';
-
-
+import Promise from 'bluebird';
 import express from 'express';
 import superTestAsPromised from 'supertest-as-promised';
+
+import timeturner from '../';
 
 describe('expressMiddleware', () => {
     let tt;
