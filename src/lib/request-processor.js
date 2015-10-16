@@ -6,9 +6,7 @@ const debug = require('debug')('dice:timeturner:request-processor');
 
 export default function(opts) {
     return async function(job) {
-        const {data} = job;
-
-        const {url, headers, body, method} = data;
+        const {url, headers, body, method} = job;
 
         let reqOpts = {
             uri    : url,
