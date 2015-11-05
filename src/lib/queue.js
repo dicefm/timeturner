@@ -33,7 +33,7 @@ export default function(opts) {
 
         const state = (error ? 'FAIL' : 'SUCCESS');
 
-        const newState = {state, error};
+        const newState = {state, error: error.error};
         try {
             events.emit('job:set-state:init', {job, jobError: error, state});
             await apiClient.setState(_id, newState);
