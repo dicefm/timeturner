@@ -44,9 +44,6 @@ export default function(opts) {
     }
 
     async function findAll(query) {
-        if (query && query.search) {
-            return await findByURL(query.search);
-        }
         const items = await RequestModel.findAsync(query, {}, { sort: { date: 1 } });
         return items;
     }
@@ -61,13 +58,6 @@ export default function(opts) {
         }
 
         return item;
-    }
-
-    async function findByURL(url) {
-        // escaping regex (http://stackoverflow.com/a/3561711)
-        url = url.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-        const regex = new RegExp(`.*${url}.*`, 'i');
-        return RequestModel.findAsync({ 'url': regex });
     }
 
     async function updateById(id, data) {
@@ -99,7 +89,6 @@ export default function(opts) {
     return {
         create: create,
         read  : findAll,
-        search: findByURL,
         update: updateById,
         delete: deleteById,
         readId: findOneById,

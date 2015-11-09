@@ -87,15 +87,6 @@ describe('expressMiddleware', () => {
             expect(body).to.deep.eq([entry]);
         });
 
-        it('should find it by /?search=:url', async () => {
-            const date = new Date();
-            const {body, statusCode} = await req.get(`/schedule/?search=${entry.url}`);
-
-            expect(statusCode).to.eq(200);
-            expect(body).to.be.an('array');
-            expect(body).to.deep.eq([entry]);
-        });
-
         describe('and trying to update it', () => {
             let patchRes;
             before(async () => {
