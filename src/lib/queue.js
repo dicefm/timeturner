@@ -5,6 +5,17 @@ import stringifySafe from 'json-stringify-safe';
 
 const debug = require('debug')('dice:timeturner:queue');
 
+/**
+* Gets an object, removes any circular references using json-stringify-safe and returns a
+* parsed object that can be safely stringified/stored in mongodb.
+*
+* @param {Object} a potentially unsafe object to serialize (may contain circular references)
+* @return {Object} a safely serializable object without circular references
+*/
+function getSafeObject(obj) {
+    return JSON.parse(stringifySafe(obj));
+}
+
 export default function(opts) {
     opts = _.assign({
     }, opts);
@@ -33,9 +44,8 @@ export default function(opts) {
         }
 
         const state = (error ? 'FAIL' : 'SUCCESS');
+        const newState = {state, error: getSafeObject(error)};
 
-        // remove circular references from error, and parse it back to an object.
-        const newState = {state, error: JSON.parse(stringifySafe(error))};
         try {
             events.emit('job:set-state:init', {job, jobError: error, state});
             await apiClient.setState(_id, newState);
