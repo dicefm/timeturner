@@ -69,7 +69,8 @@ describe('queueModule', () => {
                     expect(processJob).to.have.been.calledOnce;
                     expect(processJob.args[0][0]).to.deep.eq(job);
 
-                    expect(apiClient.setState).to.have.been.calledOnce;
+                    expect(apiClient.setState).to.have.been.calledTwice;
+                    expect(apiClient.setState).to.have.been.calledWith(_id, {state: 'RUNNING', error: null});
                     expect(apiClient.setState).to.have.been.calledWith(_id, {state: 'SUCCESS', error: null});
 
                     done();
@@ -82,11 +83,11 @@ describe('queueModule', () => {
         it('and emit events', () => {
             expect(spies['job:run:init']).to.have.been.calledOnce;
             expect(spies['job:run:success']).to.have.been.calledOnce;
-            expect(spies['job:run:fail']).not.have.been.called.once;
+            expect(spies['job:run:fail']).to.have.been.notCalled;
 
             expect(spies['job:set-state:init']).to.have.been.calledOnce;
             expect(spies['job:set-state:success']).to.have.been.calledOnce;
-            expect(spies['job:set-state:fail']).not.have.been.called.once;
+            expect(spies['job:set-state:fail']).to.have.been.notCalled;
         });
     });
 
@@ -112,16 +113,16 @@ describe('queueModule', () => {
         });
 
 
-        it('should succeed', (done) => {
+        it('should fail', (done) => {
             queue.push(job, function(err) {
                 try {
-                    expect(err).to.not.be.ok;
+                    expect(err).to.be.ok;
 
-                    expect(processJob).to.have.been.calledOnce;
-                    expect(processJob.args[0][0]).to.deep.eq(job);
+                    expect(processJob).to.have.been.notCalled;
 
-                    expect(apiClient.setState).to.have.been.calledOnce;
-                    expect(apiClient.setState).to.have.been.calledWith(_id, {state: 'SUCCESS', error: null});
+                    expect(apiClient.setState).to.have.been.calledTwice;
+                    expect(apiClient.setState).to.have.been.calledWith(_id, {state: 'RUNNING', error: null});
+                    expect(apiClient.setState).to.have.been.calledWith(_id, {state: 'FAIL', error: err});
 
                     done();
                 } catch (err) {
@@ -132,11 +133,11 @@ describe('queueModule', () => {
 
         it('and emit events', () => {
             expect(spies['job:run:init']).to.have.been.calledOnce;
-            expect(spies['job:run:success']).to.have.been.calledOnce;
-            expect(spies['job:run:fail']).not.have.been.called.once;
+            expect(spies['job:run:success']).to.have.been.notCalled;
+            expect(spies['job:run:fail']).to.have.been.notCalled;
 
             expect(spies['job:set-state:init']).to.have.been.calledOnce;
-            expect(spies['job:set-state:success']).not.have.been.called.once;
+            expect(spies['job:set-state:success']).to.have.been.notCalled;
             expect(spies['job:set-state:fail']).to.have.been.calledOnce;
         });
     });
@@ -163,7 +164,8 @@ describe('queueModule', () => {
                     expect(processJob).to.have.been.calledOnce;
                     expect(processJob.args[0][0]).to.deep.eq(job);
 
-                    expect(apiClient.setState).to.have.been.calledOnce;
+                    expect(apiClient.setState).to.have.been.calledTwice;
+                    expect(apiClient.setState).to.have.been.calledWith(_id, {state: 'RUNNING', error: null});
                     expect(apiClient.setState).to.have.been.calledWith(_id, {state: 'FAIL', error: new Error('Something went wrong!')});
 
                     done();
@@ -175,12 +177,12 @@ describe('queueModule', () => {
 
         it('and emit events', () => {
             expect(spies['job:run:init']).to.have.been.calledOnce;
-            expect(spies['job:run:success']).not.have.been.called.once;
+            expect(spies['job:run:success']).to.have.been.notCalled;
             expect(spies['job:run:fail']).to.have.been.calledOnce;
 
             expect(spies['job:set-state:init']).to.have.been.calledOnce;
             expect(spies['job:set-state:success']).to.have.been.calledOnce;
-            expect(spies['job:set-state:fail']).not.have.been.called.once;
+            expect(spies['job:set-state:fail']).to.have.been.notCalled;
         });
     });
 });
