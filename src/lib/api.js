@@ -1,8 +1,22 @@
 import _ from 'lodash';
+import stringifySafe from 'json-stringify-safe';
+
 import HTTPError from '../errors/HTTPError';
 
 export default function(opts) {
     const {RequestModel} = opts;
+
+    /**
+    * Gets an object, removes any circular references using json-stringify-safe and returns a
+    * parsed object that can be safely stringified/stored in mongodb.
+    *
+    * @param {Object} a potentially unsafe object to serialize (may contain circular references)
+    * @return {Object} a safely serializable object without circular references
+    */
+    function getSafeObject(obj) {
+        return JSON.parse(stringifySafe(obj));
+    }
+
 
     async function updateRequest(request, data) {
         data = _.pick(data, RequestModel.editableFields());
@@ -74,7 +88,7 @@ export default function(opts) {
         }, {
             $set: {
                 state,
-                error,
+                error: getSafeObject(error),
             },
         });
     }
