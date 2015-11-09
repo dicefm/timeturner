@@ -14,6 +14,9 @@ export default function(opts) {
     * @return {Object} a safely serializable object without circular references
     */
     function getSafeObject(obj) {
+        if (typeof obj === 'undefined') {
+            return obj;
+        }
         return JSON.parse(stringifySafe(obj));
     }
 
