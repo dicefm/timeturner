@@ -33,7 +33,7 @@ export default function(opts) {
 
             _id = job._id;
 
-            await apiClient.setState(_id, {state: 'RUNNING', error: undefined});
+            await apiClient.setState(_id, {state: 'RUNNING', error: null});
 
             await processJob(job);
             events.emit('job:run:success', {job});
