@@ -52,9 +52,7 @@ export default function(opts) {
         const item = await RequestModel.findByIdAsync(id);
 
         if (!item) {
-            let error = new Error(`RequestModel with id '${id}' not found.`);
-            error.statusCode = 404;
-            throw error;
+            throw new HTTPError(404, `RequestModel with id '${id}' not found.`);
         }
 
         return item;
