@@ -1,6 +1,7 @@
 import async from 'async';
 import _ from 'lodash';
 import {EventEmitter} from 'events';
+import stringifySafe from 'json-stringify-safe';
 
 const debug = require('debug')('dice:timeturner:queue');
 
@@ -33,7 +34,8 @@ export default function(opts) {
 
         const state = (error ? 'FAIL' : 'SUCCESS');
 
-        const newState = {state, error: error.error};
+        // remove circular references from error, and parse it back to an object.
+        const newState = {state, error: JSON.parse(stringifySafe(error))};
         try {
             events.emit('job:set-state:init', {job, jobError: error, state});
             await apiClient.setState(_id, newState);
