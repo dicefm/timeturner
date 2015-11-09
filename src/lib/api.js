@@ -5,6 +5,11 @@ export default function(opts) {
 
     async function updateRequest(request, data) {
         data = _.pick(data, RequestModel.editableFields());
+
+        const {state} = request;
+        if (_.includes(['QUEING', 'QUEUED', 'RUNNING'], state)) {
+            throw new Error(`You can't change requests that are in a "${state}" state`);
+        }
         _.assign(request, data);
 
         await request.saveAsync();

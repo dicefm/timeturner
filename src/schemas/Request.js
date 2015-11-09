@@ -31,6 +31,7 @@ Request.statics.editableFields = function() {
         'body',
         'headers',
         'notes',
+        'state',
     ];
 };
 
