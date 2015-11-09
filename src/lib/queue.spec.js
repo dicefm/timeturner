@@ -63,15 +63,19 @@ describe('queueModule', () => {
 
         it('should succeed', (done) => {
             queue.push(job, function(err) {
-                expect(err).to.not.be.ok;
+                try {
+                    expect(err).to.not.be.ok;
 
-                expect(processJob).to.have.been.calledOnce;
-                expect(processJob.args[0][0]).to.deep.eq(job);
+                    expect(processJob).to.have.been.calledOnce;
+                    expect(processJob.args[0][0]).to.deep.eq(job);
 
-                expect(apiClient.setState).to.have.been.calledOnce;
-                expect(apiClient.setState).to.have.been.calledWith(_id, {state: 'SUCCESS', error: null});
+                    expect(apiClient.setState).to.have.been.calledOnce;
+                    expect(apiClient.setState).to.have.been.calledWith(_id, {state: 'SUCCESS', error: null});
 
-                done();
+                    done();
+                } catch (err) {
+                    done(err);
+                }
             });
         });
 
@@ -110,15 +114,19 @@ describe('queueModule', () => {
 
         it('should succeed', (done) => {
             queue.push(job, function(err) {
-                expect(err).to.not.be.ok;
+                try {
+                    expect(err).to.not.be.ok;
 
-                expect(processJob).to.have.been.calledOnce;
-                expect(processJob.args[0][0]).to.deep.eq(job);
+                    expect(processJob).to.have.been.calledOnce;
+                    expect(processJob.args[0][0]).to.deep.eq(job);
 
-                expect(apiClient.setState).to.have.been.calledOnce;
-                expect(apiClient.setState).to.have.been.calledWith(_id, {state: 'SUCCESS', error: null});
+                    expect(apiClient.setState).to.have.been.calledOnce;
+                    expect(apiClient.setState).to.have.been.calledWith(_id, {state: 'SUCCESS', error: null});
 
-                done();
+                    done();
+                } catch (err) {
+                    done(err);
+                }
             });
         });
 
@@ -149,15 +157,19 @@ describe('queueModule', () => {
 
         it('should fail', (done) => {
             queue.push(job, function(err) {
-                expect(err).to.be.ok;
+                try {
+                    expect(err).to.be.ok;
 
-                expect(processJob).to.have.been.calledOnce;
-                expect(processJob.args[0][0]).to.deep.eq(job);
+                    expect(processJob).to.have.been.calledOnce;
+                    expect(processJob.args[0][0]).to.deep.eq(job);
 
-                expect(apiClient.setState).to.have.been.calledOnce;
-                expect(apiClient.setState).to.have.been.calledWith(_id, {state: 'FAIL', error: new Error('Something went wrong!')});
+                    expect(apiClient.setState).to.have.been.calledOnce;
+                    expect(apiClient.setState).to.have.been.calledWith(_id, {state: 'FAIL', error: new Error('Something went wrong!')});
 
-                done();
+                    done();
+                } catch (err) {
+                    done(err);
+                }
             });
         });
 
