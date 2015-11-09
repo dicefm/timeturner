@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import HTTPError from '../errors/HTTPError';
 
 export default function(opts) {
     const {RequestModel} = opts;
@@ -8,7 +9,7 @@ export default function(opts) {
 
         const {state} = request;
         if (_.includes(['QUEING', 'QUEUED', 'RUNNING'], state)) {
-            throw new Error(`You can't change requests that are in a "${state}" state`);
+            throw new HTTPError(403, `You can't change requests that are in a "${state}" state`);
         }
         _.assign(request, data);
 
