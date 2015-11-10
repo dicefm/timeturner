@@ -46,49 +46,39 @@ describe('timestampPlugin', () => {
         });
 
         describe('if it\'s a new entry', () => {
-            it('should set both created_at/updated_at', (done) => {
-                entry.save((err) => {
-                    expect(err).to.not.be.ok;
+            it('should set both created_at/updated_at', async () => {
+                await entry.saveAsync();
 
-                    const timestampAfter = new Date;
+                const timestampAfter = new Date;
 
-                    expect(entry.model.meta.created_at).to.be.afterTime(timestampBefore);
-                    expect(entry.model.meta.updated_at).to.be.afterTime(timestampBefore);
+                expect(entry.model.meta.created_at).to.be.afterTime(timestampBefore);
+                expect(entry.model.meta.updated_at).to.be.afterTime(timestampBefore);
 
-                    expect(entry.model.meta.created_at).to.be.beforeTime(timestampAfter);
-                    expect(entry.model.meta.updated_at).to.be.beforeTime(timestampAfter);
+                expect(entry.model.meta.created_at).to.be.beforeTime(timestampAfter);
+                expect(entry.model.meta.updated_at).to.be.beforeTime(timestampAfter);
 
-                    expect(entry.model.meta.created_at).to.be.equalTime(entry.model.meta.updated_at);
-
-                    done();
-                });
+                expect(entry.model.meta.created_at).to.be.equalTime(entry.model.meta.updated_at);
             });
         });
 
 
         describe('if it\'s an existing entry', () => {
-            it('should set updated_at to now w/o updating created_at', (done) => {
+            it('should set updated_at to now w/o updating created_at', async () => {
                 let timestampBeforeUpdate;
                 let createdAt;
 
-                entry.saveAsync()
-                    .then(() => {
-                        expect(entry.model.meta.created_at).to.be.equalTime(entry.model.meta.updated_at);
+                await entry.saveAsync()
+                expect(entry.model.meta.created_at).to.be.equalTime(entry.model.meta.updated_at);
 
-                        timestampBeforeUpdate = new Date;
-                        createdAt = entry.model.meta.created_at;
-                        return entry.saveAsync();
-                    })
-                    .then(() => {
-                        const timestampAfter = new Date;
+                timestampBeforeUpdate = new Date;
+                createdAt = entry.model.meta.created_at;
+                await entry.saveAsync();
 
-                        expect(entry.model.meta.created_at).to.be.equalTime(createdAt);
+                const timestampAfter = new Date;
 
-                        expect(entry.model.meta.updated_at).to.be.afterTime(createdAt);
-                    })
-                    .then(done)
-                    .catch(done)
-                    ;
+                expect(entry.model.meta.created_at).to.be.equalTime(createdAt);
+
+                expect(entry.model.meta.updated_at).to.be.afterTime(createdAt);
             });
         });
     });
@@ -103,57 +93,47 @@ describe('timestampPlugin', () => {
         };
 
 
-        beforeEach(function(done) {
+        beforeEach(async () => {
             $set = {
                 name: `TestModel ${Math.random()}`,
             };
-            Promise.all([
+            await Promise.all([
                 new SimpleModel({name: 'TestModel ShouldBeUpdated'}).saveAsync(),
                 new SimpleModel({name: 'TestModel ShouldBeUpdated'}).saveAsync(),
                 new SimpleModel({name: 'TestModel ShouldBeUpdated'}).saveAsync(),
                 new SimpleModel({name: 'TestModel ShouldNotBeUpdated'}).saveAsync(),
                 new SimpleModel({name: 'TestModel ShouldNotBeUpdated'}).saveAsync(),
             ])
-            .then(() => {
-                timestampBeforeUpdate = new Date();
+            timestampBeforeUpdate = new Date();
 
-                return SimpleModel.updateAsync(conditions, {
-                    $set: $set,
-                });
-            })
-            .then(() => { done() })
-            .catch(done);
+            await SimpleModel.updateAsync(conditions, {
+                $set: $set,
+            });
         });
 
-        it('should set updated_at to now w/o updating created_at', (done) => {
-            SimpleModel.findAsync($set).then((entries) => {
-                const timestampAfter = new Date;
-                expect(entries.length).to.be.above(0);
+        it('should set updated_at to now w/o updating created_at', async () => {
+            const entries = await SimpleModel.findAsync($set);
+            const timestampAfter = new Date;
+            expect(entries.length).to.be.above(0);
 
-                entries.forEach((entry) => {
-                    expect(entry.model.meta.updated_at).to.be.afterTime(timestampBefore);
-                    expect(entry.model.meta.created_at).to.be.beforeTime(timestampBeforeUpdate);
-                });
-            })
-            .then(done)
-            .catch(done);
+            entries.forEach((entry) => {
+                expect(entry.model.meta.updated_at).to.be.afterTime(timestampBefore);
+                expect(entry.model.meta.created_at).to.be.beforeTime(timestampBeforeUpdate);
+            });
         });
 
-        it('should NOT set updated_at to on anything the query didn\'t match', (done) => {
+        it('should NOT set updated_at to on anything the query didn\'t match', async () => {
             let negatedSet = {};
             for (const key in $set) {
                 negatedSet[key] = {$ne: $set[key]};
             }
-            SimpleModel.findAsync(negatedSet, {}).then((entries) => {
-                const timestampAfter = new Date;
-                expect(entries.length).to.be.above(0);
+            const entries = await SimpleModel.findAsync(negatedSet, {});
+            const timestampAfter = new Date;
+            expect(entries.length).to.be.above(0);
 
-                entries.forEach((entry) => {
-                    expect(entry.model.meta.updated_at).to.be.beforeTime(timestampBeforeUpdate);
-                });
-            })
-            .then(done)
-            .catch(done);
+            entries.forEach((entry) => {
+                expect(entry.model.meta.updated_at).to.be.beforeTime(timestampBeforeUpdate);
+            });
         });
     });
 
@@ -167,32 +147,25 @@ describe('timestampPlugin', () => {
         };
 
 
-        beforeEach(function(done) {
+        beforeEach(async () => {
             $set = {
                 name: `TestModel ${Math.random()}`,
             };
-            Promise.all([
+            await Promise.all([
                 new SimpleModel({name: 'TestModel ShouldBeUpdated'}).saveAsync(),
             ])
-            .then(() => {
-                timestampBeforeUpdate = new Date();
+            timestampBeforeUpdate = new Date();
 
-                return SimpleModel.findOneAndUpdate(conditions, {
-                    $set: $set,
-                });
-            })
-            .then(() => { done() })
-            .catch(done);
+            await SimpleModel.findOneAndUpdate(conditions, {
+                $set: $set,
+            });
         });
 
 
-        it('should set updated_at', (done) => {
-            SimpleModel.findOne($set).then((entry) => {
-                expect(entry.model.meta.updated_at).to.be.afterTime(timestampBefore);
-                expect(entry.model.meta.created_at).to.be.beforeTime(timestampBeforeUpdate);
-            })
-            .then(done)
-            .catch(done);
+        it('should set updated_at', async () => {
+            const entry = await SimpleModel.findOne($set);
+            expect(entry.model.meta.updated_at).to.be.afterTime(timestampBefore);
+            expect(entry.model.meta.created_at).to.be.beforeTime(timestampBeforeUpdate);
         });
     });
 });
