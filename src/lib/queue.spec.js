@@ -63,20 +63,16 @@ describe('queueModule', () => {
 
         it('should succeed', (done) => {
             queue.push(job, function(err) {
-                try {
-                    expect(err).to.not.be.ok;
+                expect(err).to.not.be.ok;
 
-                    expect(processJob).to.have.been.calledOnce;
-                    expect(processJob.args[0][0]).to.deep.eq(job);
+                expect(processJob).to.have.been.calledOnce;
+                expect(processJob.args[0][0]).to.deep.eq(job);
 
-                    expect(apiClient.setState).to.have.been.calledTwice;
-                    expect(apiClient.setState).to.have.been.calledWith(_id, {state: 'RUNNING', error: null});
-                    expect(apiClient.setState).to.have.been.calledWith(_id, {state: 'SUCCESS', error: null});
+                expect(apiClient.setState).to.have.been.calledTwice;
+                expect(apiClient.setState).to.have.been.calledWith(_id, {state: 'RUNNING', error: null});
+                expect(apiClient.setState).to.have.been.calledWith(_id, {state: 'SUCCESS', error: null});
 
-                    done();
-                } catch (err) {
-                    done(err);
-                }
+                done();
             });
         });
 
@@ -115,19 +111,15 @@ describe('queueModule', () => {
 
         it('should fail', (done) => {
             queue.push(job, function(err) {
-                try {
-                    expect(err).to.be.ok;
+                expect(err).to.be.ok;
 
-                    expect(processJob).to.have.been.notCalled;
+                expect(processJob).to.have.been.notCalled;
 
-                    expect(apiClient.setState).to.have.been.calledTwice;
-                    expect(apiClient.setState).to.have.been.calledWith(_id, {state: 'RUNNING', error: null});
-                    expect(apiClient.setState).to.have.been.calledWith(_id, {state: 'FAIL', error: err});
+                expect(apiClient.setState).to.have.been.calledTwice;
+                expect(apiClient.setState).to.have.been.calledWith(_id, {state: 'RUNNING', error: null});
+                expect(apiClient.setState).to.have.been.calledWith(_id, {state: 'FAIL', error: err});
 
-                    done();
-                } catch (err) {
-                    done(err);
-                }
+                done();
             });
         });
 
@@ -158,20 +150,16 @@ describe('queueModule', () => {
 
         it('should fail', (done) => {
             queue.push(job, function(err) {
-                try {
-                    expect(err).to.be.ok;
+                expect(err).to.be.ok;
 
-                    expect(processJob).to.have.been.calledOnce;
-                    expect(processJob.args[0][0]).to.deep.eq(job);
+                expect(processJob).to.have.been.calledOnce;
+                expect(processJob.args[0][0]).to.deep.eq(job);
 
-                    expect(apiClient.setState).to.have.been.calledTwice;
-                    expect(apiClient.setState).to.have.been.calledWith(_id, {state: 'RUNNING', error: null});
-                    expect(apiClient.setState).to.have.been.calledWith(_id, {state: 'FAIL', error: new Error('Something went wrong!')});
+                expect(apiClient.setState).to.have.been.calledTwice;
+                expect(apiClient.setState).to.have.been.calledWith(_id, {state: 'RUNNING', error: null});
+                expect(apiClient.setState).to.have.been.calledWith(_id, {state: 'FAIL', error: new Error('Something went wrong!')});
 
-                    done();
-                } catch (err) {
-                    done(err);
-                }
+                done();
             });
         });
 
