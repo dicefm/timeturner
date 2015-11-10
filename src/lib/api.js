@@ -79,6 +79,7 @@ export default function(opts) {
         }, {
             $set: {
                 state,
+
                 error: getSafeObject(error),
             },
         });
