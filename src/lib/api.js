@@ -1,10 +1,33 @@
 import _ from 'lodash';
+import stringifySafe from 'json-stringify-safe';
+
+import HTTPError from '../errors/HTTPError';
 
 export default function(opts) {
     const {RequestModel} = opts;
 
+    /**
+    * Gets an object, removes any circular references using json-stringify-safe and returns a
+    * parsed object that can be safely stringified/stored in mongodb.
+    *
+    * @param {Object} a potentially unsafe object to serialize (may contain circular references)
+    * @return {Object} a safely serializable object without circular references
+    */
+    function getSafeObject(obj) {
+        if (typeof obj === 'undefined') {
+            return obj;
+        }
+        return JSON.parse(stringifySafe(obj));
+    }
+
+
     async function updateRequest(request, data) {
         data = _.pick(data, RequestModel.editableFields());
+
+        const {state} = request;
+        if (_.includes(['QUEING', 'QUEUED', 'RUNNING'], state)) {
+            throw new HTTPError(403, `You can't change requests that are in a "${state}" state`);
+        }
         _.assign(request, data);
 
         await request.saveAsync();
@@ -29,9 +52,7 @@ export default function(opts) {
         const item = await RequestModel.findByIdAsync(id);
 
         if (!item) {
-            let error = new Error(`RequestModel with id '${id}' not found.`);
-            error.statusCode = 404;
-            throw error;
+            throw new HTTPError(404, `RequestModel with id '${id}' not found.`);
         }
 
         return item;
@@ -58,7 +79,8 @@ export default function(opts) {
         }, {
             $set: {
                 state,
-                error,
+
+                error: getSafeObject(error),
             },
         });
     }
