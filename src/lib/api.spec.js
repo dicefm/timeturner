@@ -28,4 +28,18 @@ describe('api', async () => {
         const updated = await tt.apiClient.readId(request._id);
         expect(updated.state).to.eq('FAIL');
     });
+
+    it('should setState with Error', async () => {
+        const {RequestModel} = tt;
+        const request = await tt.apiClient.create({
+            url   : 'https://dice.fm/test',
+            method: 'GET',
+            date  : new Date(),
+        });
+        expect(request.state).to.eq('SCHEDULED');
+        await tt.apiClient.setState(request._id, {state: 'FAIL', error: new Error('test')});
+        const updated = await tt.apiClient.readId(request._id);
+        expect(updated.state).to.eq('FAIL');
+        expect(updated.error).to.not.be.undefined;
+    });
 });
