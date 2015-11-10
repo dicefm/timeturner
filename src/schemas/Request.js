@@ -6,7 +6,7 @@ import timestampPlugin from './plugins/timestamp';
 import headersPlugin from './plugins/headers';
 
 const SUPPORTED_HTTP_METHODS = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
-const STATES = ['SCHEDULED', 'QUEING', 'QUEUED', 'SUCCESS', 'ERROR'];
+const STATES = ['SCHEDULED', 'QUEING', 'QUEUED', 'RUNNING', 'SUCCESS', 'ERROR'];
 
 const Request = new Schema({
     url   : {type: String, required: true, trim: true },
@@ -31,6 +31,7 @@ Request.statics.editableFields = function() {
         'body',
         'headers',
         'notes',
+        'state',
     ];
 };
 

@@ -10,6 +10,7 @@ describe('expressMiddleware', () => {
 
     const uniqueUrl = `https://test.dice.fm/?before${Math.random()}`;
     const uniqueUrl2 = `https://test.dice.fm/?after${Math.random()}`;
+    const uniqueUrlRunning = `https://test.dice.fm/?running${Math.random()}`;
     const notes = {foo: 'bar'};
     let createdItem;
 
@@ -35,7 +36,7 @@ describe('expressMiddleware', () => {
     describe(`when creating an item with a unique URL`, () => {
         const date = new Date();
 
-        let id;
+        let id, runningId;
 
         let entry;
 
@@ -46,6 +47,13 @@ describe('expressMiddleware', () => {
                 date  : date,
                 url   : uniqueUrl,
                 notes : notes,
+            });
+            const {body: runningBody} = await req.post('/schedule').send({
+                method: 'GET',
+                date  : date,
+                url   : uniqueUrlRunning,
+                notes : notes,
+                state : 'RUNNING',
             });
 
             expect(statusCode).to.eq(200);
@@ -58,6 +66,7 @@ describe('expressMiddleware', () => {
 
             entry = body;
             id = body._id;
+            runningId = runningBody._id;
         });
 
         it('should find it by /:id', async () => {
@@ -100,6 +109,12 @@ describe('expressMiddleware', () => {
                 const {body, statusCode} = await req.get(`/schedule/${id}`);
 
                 expect(body.notes).to.deep.eq(notes);
+            });
+
+            it('should not updated jobs in intermediate states expected response when updating it', async () => {
+                const {body, statusCode} = await req.patch(`/schedule/${runningId}`).send({data: new Date(), state: 'SCHEDULED'});
+                expect(statusCode).to.eq(403);
+                expect(body.description).to.eq(`You can't change requests that are in a "RUNNING" state`);
             });
 
         });
