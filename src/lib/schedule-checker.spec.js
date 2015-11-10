@@ -48,7 +48,7 @@ describe('scheduleChecker', () => {
         it('nothing should run', async () => {
             await checkSchedule();
 
-            expect(enqueue).not.have.been.called.once;
+            expect(enqueue).to.have.been.notCalled;
         });
     });
 
@@ -98,7 +98,7 @@ describe('scheduleChecker', () => {
             }
             await checkSchedule();
 
-            expect(enqueue).not.have.been.called.once;
+            expect(enqueue).to.have.been.notCalled;
         });
     });
 });

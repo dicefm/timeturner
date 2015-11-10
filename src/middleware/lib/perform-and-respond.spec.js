@@ -51,14 +51,14 @@ describe('performAndRespond', () => {
 
         await clockTick(5);
 
-        expect(res.send).not.have.been.called.once;
-        expect(res.status).not.have.been.called.once;
-        expect(res.sendStatus).not.have.been.called.once;
+        expect(res.send).to.have.been.notCalled;
+        expect(res.status).to.have.been.notCalled;
+        expect(res.sendStatus).to.have.been.notCalled;
 
         await clockTick(6);
 
-        expect(res.send).not.have.been.called.once;
-        expect(res.status).not.have.been.called.once;
+        expect(res.send).to.have.been.notCalled;
+        expect(res.status).to.have.been.notCalled;
         expect(res.sendStatus).to.have.been.calledOnce;
         expect(res.sendStatus).calledWith(204);
     });
@@ -68,14 +68,14 @@ describe('performAndRespond', () => {
 
         await clockTick(5);
 
-        expect(res.send).not.have.been.called.once;
-        expect(res.status).not.have.been.called.once;
-        expect(res.sendStatus).not.have.been.called.once;
+        expect(res.send).to.have.been.notCalled;
+        expect(res.status).to.have.been.notCalled;
+        expect(res.sendStatus).to.have.been.notCalled;
 
         await clockTick(6);
 
-        expect(res.status).not.have.been.called.once;
-        expect(res.sendStatus).not.have.been.called.once;
+        expect(res.status).to.have.been.notCalled;
+        expect(res.sendStatus).to.have.been.notCalled;
 
         expect(res.send).calledWith({foo: 'bar'});
     });
@@ -86,13 +86,13 @@ describe('performAndRespond', () => {
 
         await clockTick(5);
 
-        expect(res.send).not.have.been.called.once;
-        expect(res.status).not.have.been.called.once;
-        expect(res.sendStatus).not.have.been.called.once;
+        expect(res.send).to.have.been.notCalled;
+        expect(res.status).to.have.been.notCalled;
+        expect(res.sendStatus).to.have.been.notCalled;
 
         await clockTick(6);
 
-        expect(res.sendStatus).not.have.been.called.once;
+        expect(res.sendStatus).to.have.been.notCalled;
 
         expect(res.status).to.have.been.called.once;
         expect(res.send).to.have.been.called.once;
