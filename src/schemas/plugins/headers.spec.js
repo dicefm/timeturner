@@ -124,10 +124,10 @@ describe('headersPlugin', () => {
             });
         });
 
-        it('or the default value if there was none', async () => {
-            let results = await entry.saveAsync();
+        it('should show the default value if there was no headers', async () => {
+            const {_id} = await entry.saveAsync();
 
-            entry = await SimpleModel.findByIdAsync(results[0]);
+            entry = await SimpleModel.findByIdAsync(_id);
 
             expect(entry.toObject().headers).to.deep.eq({});
         });
@@ -144,10 +144,10 @@ describe('headersPlugin', () => {
             });
         });
 
-        it('or the default value if there was none', async () => {
-            let results = await entry.saveAsync();
+        it('should show the default value if there was no headers', async () => {
+            const {_id} = await entry.saveAsync();
 
-            entry = await SimpleModel.findByIdAsync(results[0]);
+            entry = await SimpleModel.findByIdAsync(_id);
 
             expect(entry.toJSON().headers).to.deep.eq({});
         });
