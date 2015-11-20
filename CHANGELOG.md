@@ -3,8 +3,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.2.3 (2015-11-20)
 
 * :sparkles: RUNNING state
+* :bug: fix serialisation of errors with circular refs
 
 
 ## 0.2.2 (2015-10-16)
