@@ -9,14 +9,15 @@ const SUPPORTED_HTTP_METHODS = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
 const STATES = ['SCHEDULED', 'QUEING', 'QUEUED', 'RUNNING', 'SUCCESS', 'ERROR'];
 
 const Request = new Schema({
-    url   : {type: String, required: true, trim: true },
-    date  : {type: Date, required: true },
-    method: {type: String, enum: SUPPORTED_HTTP_METHODS, required: true },
-    body  : {type: Schema.Types.Mixed },
-    state : {type: String, enum: STATES, required: true, default: 'SCHEDULED' },
-    job_id: {type: String},
-    notes : {type: Schema.Types.Mixed},
-    error : {type: Schema.Types.Mixed, default: null},
+    url    : {type: String, required: true, trim: true },
+    date   : {type: Date, required: true },
+    method : {type: String, enum: SUPPORTED_HTTP_METHODS, required: true },
+    body   : {type: Schema.Types.Mixed },
+    state  : {type: String, enum: STATES, required: true, default: 'SCHEDULED' },
+    job_id : {type: String},
+    notes  : {type: Schema.Types.Mixed},
+    error  : {type: Schema.Types.Mixed, default: null},
+    timeout: {type: Number},
 });
 
 Request.plugin(timestampPlugin);
@@ -32,6 +33,7 @@ Request.statics.editableFields = function() {
         'headers',
         'notes',
         'state',
+        'timeout',
     ];
 };
 
