@@ -18,6 +18,9 @@ const Request = new Schema({
     notes  : {type: Schema.Types.Mixed},
     error  : {type: Schema.Types.Mixed, default: null},
     timeout: {type: Number},
+
+    retries       : {type: Number, default: 0},
+    retry_interval: {type: Number, default: 0},
 });
 
 Request.plugin(timestampPlugin);
@@ -34,6 +37,8 @@ Request.statics.editableFields = function() {
         'notes',
         'state',
         'timeout',
+        'retries',
+        'retry_interval'
     ];
 };
 
