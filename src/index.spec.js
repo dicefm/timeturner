@@ -6,10 +6,15 @@ import superTestAsPromised from 'supertest-as-promised';
 import express from 'express';
 import bodyParser from 'body-parser';
 
+function waitFor(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 describe('timeturner', () => {
     describe('should expose', () => {
         let tt;
         before(() => {
+            nock.cleanAll();
             tt = timeturner({
                 mongodb: {
                     url: 'mongodb://localhost:27017/timeturner_index_tests',
@@ -80,24 +85,6 @@ describe('timeturner', () => {
 
             server.use('/schedule', tt.expressMiddleware());
 
-            // 404 handler
-            server.use((req, res, next) => {
-                const err = new Error('Not found');
-                err.statusCode = 404;
-
-                next(err);
-            });
-
-            // error handler
-            server.use((err, req, res, next) => {
-                const displayError = {
-                    description: err.message || 'Something went wrong',
-                };
-
-                res.status(displayError.status);
-                res.send(displayError);
-            });
-
             req = superTestAsPromised(server);
         });
 
@@ -127,7 +114,7 @@ describe('timeturner', () => {
                     .reply(200, targetCalledSpy);
             });
 
-            it('should create the request in 2ms', async () => {
+            it('should create the request', async () => {
                 const soon = new Date();
                 soon.setMilliseconds(soon.getMilliseconds() + 2);
 
@@ -152,18 +139,63 @@ describe('timeturner', () => {
                 expect(res.body.length).to.eq(1);
             });
 
-            it('should trigger the request after a while', (next) => {
-                function checkCalled() {
-                    if (targetCalledSpy.notCalled) {
-                        setTimeout(checkCalled, 10);
-                    } else {
-                        expect(targetCalledSpy).to.have.been.calledOnce;
+            it('should trigger the request eventually', async () => {
+                do {
+                    await waitFor(10);
+                } while (targetCalledSpy.notCalled);
 
-                        next();
-                    }
-                }
+                expect(targetCalledSpy).to.have.been.calledOnce;
+            });
+        });
 
-                checkCalled();
+        describe('retrying failing request', () => {
+            const TARGET_URL = 'https://api-fail.dice.fm';
+
+            let targetCalledSpy;
+
+            before(() => {
+                targetCalledSpy = sinon.spy();
+
+                nock(TARGET_URL).get('/').times(9).reply(500);
+                nock(TARGET_URL).get('/').once().reply(200, targetCalledSpy);
+            });
+
+            it('should retry the request and eventually work', async () => {
+                const soon = new Date();
+                soon.setMilliseconds(soon.getMilliseconds() + 10);
+
+                const reqBody = {
+                    url   : TARGET_URL,
+                    date  : soon,
+                    method: 'GET',
+
+                    attempts_max: 10,
+                };
+                const {body, statusCode} = await req.post('/schedule').send(reqBody);
+                expect(statusCode).to.eq(200);
+
+                const {_id} = body;
+
+                expect(_id).to.be.truthy;
+
+                const allStates = new Set();
+
+                let state;
+
+                do {
+                    const {body} = await req.get(`/schedule/${_id}`);
+
+                    state = body.state;
+
+                    allStates.add(state);
+
+                    await waitFor(10);
+                } while (state !== 'SUCCESS');
+
+                expect(allStates.has('RETRYING')).to.be.truthy;
+                expect(allStates.has('SUCCESS')).to.be.truthy;
+
+                expect(targetCalledSpy).to.have.been.calledOnce;
             });
         });
     });

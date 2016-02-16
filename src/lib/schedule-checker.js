@@ -22,7 +22,7 @@ export default function(opts) {
     async function assureAtomic(request) {
         const raw = await RequestModel.updateAsync({
             _id  : request._id,
-            state: 'SCHEDULED',
+            state: request.state,
         }, {
             $set: {
                 state: 'QUEING',
@@ -63,10 +63,20 @@ export default function(opts) {
 
         // 1. findAndUpdate SCHEDULED jobs to be executed
         const requests = await apiClient.read({
-            state: 'SCHEDULED',
-            date : {
-                $lte: endOfInterval
-            }
+            $or: [
+                {
+                    state: 'SCHEDULED',
+                    date : {
+                        $lte: endOfInterval
+                    }
+                },
+                {
+                    state        : 'RETRYING',
+                    attempts_next: {
+                        $lte: endOfInterval
+                    }
+                },
+            ],
         });
 
         debug(`Scheduling ${requests.length} requests`);
