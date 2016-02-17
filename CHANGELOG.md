@@ -3,6 +3,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.2.4 (2016-02-17)
+
+* :sparkles: ability to automatically retry requests with `attempts_max` & `attempts_delay`
+
+
 ## 0.2.3 (2015-11-20)
 
 * :sparkles: RUNNING state
