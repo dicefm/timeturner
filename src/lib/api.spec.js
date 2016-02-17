@@ -16,29 +16,4 @@ describe('api', async () => {
         apiClient = tt.apiClient;
         RequestModel = tt.RequestModel;
     });
-
-    it('should setState', async () => {
-        const request = await apiClient.create({
-            url   : 'https://dice.fm/test',
-            method: 'GET',
-            date  : new Date(),
-        });
-        expect(request.state).to.eq('SCHEDULED');
-        await apiClient.setState(request._id, {state: 'FAIL'});
-        const updated = await apiClient.readId(request._id);
-        expect(updated.state).to.eq('FAIL');
-    });
-
-    it('should setState with Error', async () => {
-        const request = await apiClient.create({
-            url   : 'https://dice.fm/test',
-            method: 'GET',
-            date  : new Date(),
-        });
-        expect(request.state).to.eq('SCHEDULED');
-        await apiClient.setState(request._id, {state: 'FAIL', error: new Error('test')});
-        const updated = await apiClient.readId(request._id);
-        expect(updated.state).to.eq('FAIL');
-        expect(updated.error).to.not.be.undefined;
-    });
 });

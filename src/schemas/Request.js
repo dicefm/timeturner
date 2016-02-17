@@ -6,7 +6,7 @@ import timestampPlugin from './plugins/timestamp';
 import headersPlugin from './plugins/headers';
 
 const SUPPORTED_HTTP_METHODS = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
-const STATES = ['SCHEDULED', 'QUEING', 'QUEUED', 'RUNNING', 'SUCCESS', 'ERROR'];
+const STATES = ['SCHEDULED', 'QUEING', 'QUEUED', 'RUNNING', 'RETRYING', 'SUCCESS', 'ERROR'];
 
 const Request = new Schema({
     url   : {type: String, required: true, trim: true },
@@ -17,6 +17,12 @@ const Request = new Schema({
     job_id: {type: String},
     notes : {type: Schema.Types.Mixed},
     error : {type: Schema.Types.Mixed, default: null},
+
+    attempts_next  : {type: Date},
+    attempts_errors: [{type: Schema.Types.Mixed, default: null}],
+    attempts_count : {type: Number, default: 0, required: true},
+    attempts_max   : {type: Number, default: 1, required: true, min: 1},
+    attempts_delay : {type: Number, default: 0, required: true, min: 0},
 });
 
 Request.plugin(timestampPlugin);
@@ -32,6 +38,8 @@ Request.statics.editableFields = function() {
         'headers',
         'notes',
         'state',
+        'attempts_max',
+        'attempts_delay',
     ];
 };
 

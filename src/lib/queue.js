@@ -12,43 +12,44 @@ export default function(opts) {
 
     const events = new EventEmitter();
 
-    async function worker(job, callback) {
+    async function worker(job) {
         debug('working on job', job);
-        let _id;
-        let error = null;
+
+        const {_id} = job;
+
+        events.emit('job:run:init', {job});
+
+        await apiClient.setRunning(_id);
+
+        let error;
         try {
-            events.emit('job:run:init', {job});
-
-            _id = job._id;
-
-            await apiClient.setState(_id, {state: 'RUNNING', error: null});
-
             await processJob(job);
-            events.emit('job:run:success', {job});
-        } catch (_error) {
-            debug('job failed', _error);
-            error = _error;
-            events.emit('job:run:fail', {job, error});
+        } catch (_err) {
+            error = _err;
         }
 
-        const state = (error ? 'FAIL' : 'SUCCESS');
-        const newState = {state, error};
+        if (error) {
+            await apiClient.setFailedOrRetrying(_id, {error});
+            events.emit('job:run:fail', {job});
+        } else {
+            await apiClient.setSuccess(_id);
+            events.emit('job:run:success', {job});
+        }
+    }
 
+    async function workerWrapper(job, callback) {
+        let error;
         try {
-            events.emit('job:set-state:init', {job, jobError: error, state});
-            await apiClient.setState(_id, newState);
-            events.emit('job:set-state:success', {job, jobError: error, state});
+            await worker(job);
         } catch (_error) {
-            debug('setState failed', _error);
-
-            events.emit('job:set-state:fail', {job, jobError: error, state, error: _error});
+            error = _error;
         }
 
         callback(error);
     }
 
     // init queue
-    const queue = async.queue(worker, concurrency);
+    const queue = async.queue(workerWrapper, concurrency);
 
     const {push} = queue;
 
