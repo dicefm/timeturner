@@ -14,9 +14,6 @@ export default function(opts) {
     * @return {Object} a safely serializable object without circular references
     */
     function getSafeObject(obj) {
-        if (typeof obj === 'undefined') {
-            return obj;
-        }
         return JSON.parse(stringifySafe(obj));
     }
 
@@ -73,40 +70,40 @@ export default function(opts) {
         await RequestModel.removeAsync({_id: id});
     }
 
-    async function scheduleNextAttempt({item, error}) {
-        const nextAttempt = new Date();
-        nextAttempt.setMilliseconds(nextAttempt.getMilliseconds() + item.attempts_delay);
+    async function setFailedOrRetrying(id, {error}) {
+        const item = await findOneById(id);
+        const safeError = getSafeObject(error);
 
-        await RequestModel.updateAsync({
-            _id: item._id,
-        }, {
-            $set: {
-                state        : 'RETRYING',
-                attempts_next: nextAttempt,
-            },
-            $push: {
-                attempts_errors: getSafeObject(error),
-            },
-        });
-    }
+        let nextAttempt = null;
+        let nextState = 'FAILED';
 
-    async function setState(id, {state, error}) {
-        if (state === 'FAIL') {
-            // check if we have more attempts
-            const item = await findOneById(id);
-            if (item.attempts_count < item.attempts_max) {
-                await scheduleNextAttempt({item, error});
-                return;
-            }
+        if (item.attempts_count < item.attempts_max) {
+            nextState = 'RETRYING';
+            nextAttempt = new Date();
+            nextAttempt.setMilliseconds(nextAttempt.getMilliseconds() + item.attempts_delay);
         }
 
         await RequestModel.updateAsync({
             _id: id,
         }, {
             $set: {
-                state,
+                state        : nextState,
+                error        : safeError,
+                attempts_next: nextAttempt,
+            },
+            $push: {
+                attempts_errors: safeError,
+            },
+        });
+    }
 
-                error: getSafeObject(error),
+    async function setSuccess(id) {
+        await RequestModel.updateAsync({
+            _id: id,
+        }, {
+            $set: {
+                state: 'SUCCESS',
+                error: null,
             },
         });
     }
@@ -131,7 +128,8 @@ export default function(opts) {
         delete: deleteById,
         readId: findOneById,
 
-        setState,
         setRunning,
+        setSuccess,
+        setFailedOrRetrying,
     };
 }
