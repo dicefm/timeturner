@@ -56,6 +56,44 @@ describe('requestProcessor', () => {
 
     });
 
+    describe('when POSTing JSON', () => {
+        let targetCalledSpy;
+
+        beforeEach(() => {
+            targetCalledSpy = sinon.spy();
+
+            nock('https://api-test.dice.fm')
+                .post('/post')
+                .reply(200, (uri, requestBody) => {
+                    targetCalledSpy(requestBody);
+
+                    return {foo: 'bar'};
+                });
+
+        });
+
+        it('should work with post body as JSON', async () => {
+            const job = {
+                url    : 'https://api-test.dice.fm/post',
+                method : 'POST',
+                headers: {
+                    'content-type': 'application/json',
+                },
+                body: {hey: 'object'}
+            };
+
+            const {statusCode, body} = await processJob(job);
+
+            expect(statusCode).to.eq(200);
+            expect(body).to.deep.eq({
+                foo: 'bar',
+            });
+
+            expect(targetCalledSpy).to.have.been.calledOnce;
+            expect(targetCalledSpy).to.have.been.calledWith({hey: 'object'});
+        });
+    })
+
     it('should throw errors', async () => {
         const job = {
             url    : 'https://api-test.dice.fm/json/418',
