@@ -73,7 +73,33 @@ export default function(opts) {
         await RequestModel.removeAsync({_id: id});
     }
 
+    async function scheduleNextAttempt({item, error}) {
+        const nextAttempt = new Date();
+        nextAttempt.setMilliseconds(nextAttempt.getMilliseconds() + item.attempts_delay);
+
+        await RequestModel.updateAsync({
+            _id: item._id,
+        }, {
+            $set: {
+                state        : 'RETRYING',
+                attempts_next: nextAttempt,
+            },
+            $push: {
+                attempts_errors: getSafeObject(error),
+            },
+        });
+    }
+
     async function setState(id, {state, error}) {
+        if (state === 'FAIL') {
+            // check if we have more attempts
+            const item = await findOneById(id);
+            if (item.attempts_count < item.attempts_max) {
+                await scheduleNextAttempt({item, error});
+                return;
+            }
+        }
+
         await RequestModel.updateAsync({
             _id: id,
         }, {
@@ -85,6 +111,19 @@ export default function(opts) {
         });
     }
 
+    async function setRunning(id) {
+        await RequestModel.updateAsync({
+            _id: id,
+        }, {
+            $set: {
+                state: 'RUNNING',
+            },
+            $inc: {
+                attempts_count: 1,
+            }
+        });
+    }
+
     return {
         create: create,
         read  : findAll,
@@ -93,5 +132,6 @@ export default function(opts) {
         readId: findOneById,
 
         setState,
+        setRunning,
     };
 }

@@ -24,6 +24,7 @@ describe('api', async () => {
             date  : new Date(),
         });
         expect(request.state).to.eq('SCHEDULED');
+        await apiClient.setRunning(request._id);
         await apiClient.setState(request._id, {state: 'FAIL'});
         const updated = await apiClient.readId(request._id);
         expect(updated.state).to.eq('FAIL');
@@ -36,6 +37,7 @@ describe('api', async () => {
             date  : new Date(),
         });
         expect(request.state).to.eq('SCHEDULED');
+        await apiClient.setRunning(request._id);
         await apiClient.setState(request._id, {state: 'FAIL', error: new Error('test')});
         const updated = await apiClient.readId(request._id);
         expect(updated.state).to.eq('FAIL');

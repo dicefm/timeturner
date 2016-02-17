@@ -21,9 +21,9 @@ export default function(opts) {
 
             _id = job._id;
 
-            await apiClient.setState(_id, {state: 'RUNNING', error: null});
-
+            await apiClient.setRunning(_id);
             await processJob(job);
+
             events.emit('job:run:success', {job});
         } catch (_error) {
             debug('job failed', _error);

@@ -17,7 +17,8 @@ describe('queueModule', () => {
     function queueFactory(opts = {}) {
         let {apiClient} = opts;
         apiClient = apiClient || {
-            setState: sinon.spy(),
+            setState  : sinon.spy(),
+            setRunning: sinon.spy(),
         };
         const concurrency = 5;
         let processJob = async function(job) {
@@ -68,8 +69,8 @@ describe('queueModule', () => {
                 expect(processJob).to.have.been.calledOnce;
                 expect(processJob.args[0][0]).to.deep.eq(job);
 
-                expect(apiClient.setState).to.have.been.calledTwice;
-                expect(apiClient.setState).to.have.been.calledWith(_id, {state: 'RUNNING', error: null});
+                expect(apiClient.setState).to.have.been.calledOnce;
+                expect(apiClient.setRunning).to.have.been.calledWith(_id);
                 expect(apiClient.setState).to.have.been.calledWith(_id, {state: 'SUCCESS', error: null});
 
                 done();
@@ -100,6 +101,9 @@ describe('queueModule', () => {
                 setState: sinon.spy(() => {
                     throw new Error('Saving failed!');
                 }),
+                setRunning: sinon.spy(() => {
+                    throw new Error('setRunning failed!');
+                }),
             }
         });
 
@@ -115,8 +119,10 @@ describe('queueModule', () => {
 
                 expect(processJob).to.have.been.notCalled;
 
-                expect(apiClient.setState).to.have.been.calledTwice;
-                expect(apiClient.setState).to.have.been.calledWith(_id, {state: 'RUNNING', error: null});
+                expect(apiClient.setRunning).to.have.been.calledOnce;
+                expect(apiClient.setRunning).to.have.been.calledWith(_id);
+
+                expect(apiClient.setState).to.have.been.calledOnce;
                 expect(apiClient.setState).to.have.been.calledWith(_id, {state: 'FAIL', error: err});
 
                 done();
@@ -155,8 +161,7 @@ describe('queueModule', () => {
                 expect(processJob).to.have.been.calledOnce;
                 expect(processJob.args[0][0]).to.deep.eq(job);
 
-                expect(apiClient.setState).to.have.been.calledTwice;
-                expect(apiClient.setState).to.have.been.calledWith(_id, {state: 'RUNNING', error: null});
+                expect(apiClient.setState).to.have.been.calledOnce;
                 expect(apiClient.setState).to.have.been.calledWith(_id, {state: 'FAIL', error: new Error('Something went wrong!')});
 
                 done();
