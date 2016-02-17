@@ -92,6 +92,26 @@ describe('requestProcessor', () => {
             expect(targetCalledSpy).to.have.been.calledOnce;
             expect(targetCalledSpy).to.have.been.calledWith({hey: 'object'});
         });
+
+
+        it('should work with post body as JSON w/o declaring content-type', async () => {
+            const job = {
+                url    : 'https://api-test.dice.fm/post',
+                method : 'POST',
+                body   : {hey: 'object'},
+                headers: {},
+            };
+
+            const {statusCode, body} = await processJob(job);
+
+            expect(statusCode).to.eq(200);
+            expect(body).to.deep.eq({
+                foo: 'bar',
+            });
+
+            expect(targetCalledSpy).to.have.been.calledOnce;
+            expect(targetCalledSpy).to.have.been.calledWith({hey: 'object'});
+        });
     })
 
     it('should throw errors', async () => {
