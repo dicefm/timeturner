@@ -90,23 +90,40 @@ export default function(opts) {
         });
     }
 
-    async function setState(id, {state, error}) {
-        if (state === 'FAIL') {
-            // check if we have more attempts
-            const item = await findOneById(id);
-            if (item.attempts_count < item.attempts_max) {
-                await scheduleNextAttempt({item, error});
-                return;
-            }
+    async function setFailedOrRetrying(id, {error}) {
+        const item = await findOneById(id);
+        const safeError = getSafeObject(error);
+
+        let nextAttempt = null;
+        let nextState = 'FAILED';
+
+        if (item.attempts_count < item.attempts_max) {
+            nextState = 'RETRYING';
+            nextAttempt = new Date();
+            nextAttempt.setMilliseconds(nextAttempt.getMilliseconds() + item.attempts_delay);
         }
 
         await RequestModel.updateAsync({
             _id: id,
         }, {
             $set: {
-                state,
+                state        : nextState,
+                error        : safeError,
+                attempts_next: nextAttempt,
+            },
+            $push: {
+                attempts_errors: safeError,
+            },
+        });
+    }
 
-                error: getSafeObject(error),
+    async function setSuccess(id) {
+        await RequestModel.updateAsync({
+            _id: id,
+        }, {
+            $set: {
+                state: 'SUCCESS',
+                error: null,
             },
         });
     }
@@ -131,7 +148,8 @@ export default function(opts) {
         delete: deleteById,
         readId: findOneById,
 
-        setState,
         setRunning,
+        setSuccess,
+        setFailedOrRetrying,
     };
 }
