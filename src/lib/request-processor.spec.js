@@ -17,6 +17,11 @@ describe('requestProcessor', () => {
             .reply(200, 'foo bar');
 
         nock('https://api-test.dice.fm')
+            .matchHeader('content-type', 'text/html')
+            .get('/html')
+            .reply(200, 'foo bar');
+
+        nock('https://api-test.dice.fm')
             .matchHeader('content-type', 'application/json')
             .get('/json/418')
             .reply(418, {
@@ -30,6 +35,21 @@ describe('requestProcessor', () => {
             url    : 'https://api-test.dice.fm/200',
             method : 'GET',
             headers: {},
+        };
+
+        const {statusCode, body} = await processJob(job);
+
+        expect(statusCode).to.eq(200);
+        expect(body).to.eq('foo bar');
+    });
+
+    it('should perform requests thats not json', async () => {
+        const job = {
+            url    : 'https://api-test.dice.fm/html',
+            method : 'GET',
+            headers: {
+                'content-type': 'text/html'
+            },
         };
 
         const {statusCode, body} = await processJob(job);
