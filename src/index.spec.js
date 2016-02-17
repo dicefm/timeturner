@@ -160,7 +160,9 @@ describe('timeturner', () => {
                 nock(TARGET_URL).get('/').once().reply(200, targetCalledSpy);
             });
 
-            it('should retry the request and eventually work', async () => {
+            it('should retry the request and eventually work', async function() {
+                this.timeout(10 * 1000);
+
                 const soon = new Date();
                 soon.setMilliseconds(soon.getMilliseconds() + 10);
 
