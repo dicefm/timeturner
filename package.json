@@ -36,7 +36,7 @@
     "coveralls": "^2.11.4",
     "eslint": "^2.1.0",
     "eslint-plugin-react": "^3.5.1",
-    "isparta": "^4.0.0",
+    "isparta": "^3.5.3",
     "mocha": "^2.3.3",
     "morgan": "^1.6.1",
     "nock": "^7.2.1",
