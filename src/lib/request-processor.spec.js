@@ -4,33 +4,11 @@ import requestProcessor from './request-processor';
 describe('requestProcessor', () => {
     const processJob = requestProcessor();
 
-    beforeEach(() => {
-        nock('https://api-test.dice.fm')
-            .matchHeader('content-type', 'application/json')
-            .get('/json/200')
-            .reply(200, {
-                foo: 'bar',
-            });
-
+    it('should perform requests', async () => {
         nock('https://api-test.dice.fm')
             .get('/200')
             .reply(200, 'foo bar');
 
-        nock('https://api-test.dice.fm')
-            .matchHeader('content-type', 'text/html')
-            .get('/html')
-            .reply(200, 'foo bar');
-
-        nock('https://api-test.dice.fm')
-            .matchHeader('content-type', 'application/json')
-            .get('/json/418')
-            .reply(418, {
-                foo: 'bar',
-            });
-    });
-
-
-    it('should perform requests', async () => {
         const job = {
             url    : 'https://api-test.dice.fm/200',
             method : 'GET',
@@ -44,6 +22,11 @@ describe('requestProcessor', () => {
     });
 
     it('should perform requests thats not json', async () => {
+        nock('https://api-test.dice.fm')
+            .matchHeader('content-type', 'text/html')
+            .get('/html')
+            .reply(200, 'foo bar');
+
         const job = {
             url    : 'https://api-test.dice.fm/html',
             method : 'GET',
@@ -59,6 +42,13 @@ describe('requestProcessor', () => {
     });
 
     it('should perform JSON requests', async () => {
+        nock('https://api-test.dice.fm')
+            .matchHeader('content-type', 'application/json')
+            .get('/json/200')
+            .reply(200, {
+                foo: 'bar',
+            });
+
         const job = {
             url    : 'https://api-test.dice.fm/json/200',
             method : 'GET',
@@ -73,7 +63,6 @@ describe('requestProcessor', () => {
         expect(body).to.deep.eq({
             foo: 'bar',
         });
-
     });
 
     describe('when POSTing JSON', () => {
@@ -135,6 +124,13 @@ describe('requestProcessor', () => {
     })
 
     it('should throw errors', async () => {
+        nock('https://api-test.dice.fm')
+            .matchHeader('content-type', 'application/json')
+            .get('/json/418')
+            .reply(418, {
+                foo: 'bar',
+            });
+
         const job = {
             url    : 'https://api-test.dice.fm/json/418',
             method : 'GET',
