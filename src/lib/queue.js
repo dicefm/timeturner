@@ -31,13 +31,13 @@ export default function(opts) {
         if (error) {
             await apiClient.setFailedOrRetrying(_id, {error});
 
-            job = await apiClient.findOneById(job._id);
+            job = await apiClient.findOneById(_id);
 
             events.emit('job:run:fail', {job});
         } else {
             await apiClient.setSuccess(_id);
 
-            job = await apiClient.findOneById(job._id);
+            job = await apiClient.findOneById(_id);
 
             events.emit('job:run:success', {job});
         }
