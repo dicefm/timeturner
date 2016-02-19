@@ -6,7 +6,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## 0.3.2 (2016-02-19)
 
-* :art: fix emit of success/fail
+* :bug: fix emit of success/fail
 
 
 ## 0.3.1 (2016-02-18)
