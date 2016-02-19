@@ -17,7 +17,7 @@ describe('queueModule', () => {
             setRunning         : sinon.spy(),
             setSuccess         : sinon.spy(),
             setFailedOrRetrying: sinon.spy(),
-            findOneById        : sinon.spy(),
+            readId             : sinon.spy(),
         };
         const concurrency = 5;
         let processJob = async function(job) {
