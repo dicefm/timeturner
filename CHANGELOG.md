@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## 0.3.2 (2016-02-19)
+
+* :art: fix emit of success/fail
+
+
 ## 0.3.1 (2016-02-18)
 
 * :art: emit state of req after state updated
