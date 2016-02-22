@@ -15,24 +15,27 @@ export default function(opts) {
     async function worker(job) {
         debug('working on job', job);
 
-        const {_id} = job;
+        const {_id, save_reply: saveReply} = job;
 
         events.emit('job:run:init', {job});
 
         await apiClient.setRunning(_id);
 
-        let error;
+        let error, reply;
         try {
-            await processJob(job);
+            const result = await processJob(job);
+            reply = saveReply === true ? result.body : undefined;
         } catch (_err) {
             error = _err;
         }
 
         if (error) {
             await apiClient.setFailedOrRetrying(_id, {error});
+            job = await apiClient.readId(_id);
             events.emit('job:run:fail', {job});
         } else {
-            await apiClient.setSuccess(_id);
+            await apiClient.setSuccess(_id, reply);
+            job = await apiClient.readId(_id);
             events.emit('job:run:success', {job});
         }
     }

@@ -97,13 +97,15 @@ export default function(opts) {
         });
     }
 
-    async function setSuccess(id) {
+    async function setSuccess(id, reply) {
         await RequestModel.updateAsync({
             _id: id,
         }, {
             $set: {
                 state: 'SUCCESS',
                 error: null,
+
+                reply,
             },
         });
     }

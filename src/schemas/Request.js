@@ -23,6 +23,9 @@ const Request = new Schema({
     attempts_count : {type: Number, default: 0, required: true},
     attempts_max   : {type: Number, default: 1, required: true, min: 1},
     attempts_delay : {type: Number, default: 0, required: true, min: 0},
+
+    save_reply: { type: Boolean, default: false },
+    reply     : { type: Schema.Types.Mixed, required: false, }
 });
 
 Request.plugin(timestampPlugin);
@@ -40,6 +43,8 @@ Request.statics.editableFields = function() {
         'state',
         'attempts_max',
         'attempts_delay',
+        'save_reply',
+        'reply',
     ];
 };
 
