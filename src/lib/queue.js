@@ -31,7 +31,7 @@ export default function(opts) {
         if (error) {
             await apiClient.setFailedOrRetrying(_id, {error});
             job = await apiClient.readId(_id);
-            events.emit('job:run:fail', {job, response});
+            events.emit('job:run:fail', {job, error});
         } else {
             await apiClient.setSuccess(_id);
             job = await apiClient.readId(_id);
