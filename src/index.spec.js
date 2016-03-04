@@ -129,7 +129,9 @@ describe('timeturner', () => {
                     .reply(200, targetCalledSpy);
             });
 
-            it('should create the request', async () => {
+            it('should create the request', async function() {
+                this.timeout(10 * 1000);
+
                 const soon = new Date();
                 soon.setMilliseconds(soon.getMilliseconds() + 2);
 

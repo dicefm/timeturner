@@ -21,25 +21,25 @@ export default function(opts) {
 
         await apiClient.setRunning(_id);
 
-        let error;
+        let error, response;
         try {
-            await processJob(job);
+            response = await processJob(job);
         } catch (_err) {
             error = _err;
         }
 
         if (error) {
             await apiClient.setFailedOrRetrying(_id, {error});
-
-            job = await apiClient.readId(_id);
-
-            events.emit('job:run:fail', {job});
+            
+			job = await apiClient.readId(_id);
+            
+			events.emit('job:run:fail', {job, error});
         } else {
             await apiClient.setSuccess(_id);
-
-            job = await apiClient.readId(_id);
-
-            events.emit('job:run:success', {job});
+            
+			job = await apiClient.readId(_id);
+            
+			events.emit('job:run:success', {job, response});
         }
     }
 
