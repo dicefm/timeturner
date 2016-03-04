@@ -4,28 +4,11 @@ import requestProcessor from './request-processor';
 describe('requestProcessor', () => {
     const processJob = requestProcessor();
 
-    beforeEach(() => {
-        nock('https://api-test.dice.fm')
-            .matchHeader('content-type', 'application/json')
-            .get('/json/200')
-            .reply(200, {
-                foo: 'bar',
-            });
-
+    it('should perform requests', async () => {
         nock('https://api-test.dice.fm')
             .get('/200')
             .reply(200, 'foo bar');
 
-        nock('https://api-test.dice.fm')
-            .matchHeader('content-type', 'application/json')
-            .get('/json/418')
-            .reply(418, {
-                foo: 'bar',
-            });
-    });
-
-
-    it('should perform requests', async () => {
         const job = {
             url    : 'https://api-test.dice.fm/200',
             method : 'GET',
@@ -38,7 +21,34 @@ describe('requestProcessor', () => {
         expect(body).to.eq('foo bar');
     });
 
+    it('should perform requests thats not json', async () => {
+        nock('https://api-test.dice.fm')
+            .matchHeader('content-type', 'text/html')
+            .get('/html')
+            .reply(200, 'foo bar');
+
+        const job = {
+            url    : 'https://api-test.dice.fm/html',
+            method : 'GET',
+            headers: {
+                'content-type': 'text/html'
+            },
+        };
+
+        const {statusCode, body} = await processJob(job);
+
+        expect(statusCode).to.eq(200);
+        expect(body).to.eq('foo bar');
+    });
+
     it('should perform JSON requests', async () => {
+        nock('https://api-test.dice.fm')
+            .matchHeader('content-type', 'application/json')
+            .get('/json/200')
+            .reply(200, {
+                foo: 'bar',
+            });
+
         const job = {
             url    : 'https://api-test.dice.fm/json/200',
             method : 'GET',
@@ -53,10 +63,74 @@ describe('requestProcessor', () => {
         expect(body).to.deep.eq({
             foo: 'bar',
         });
-
     });
 
+    describe('when POSTing JSON', () => {
+        let targetCalledSpy;
+
+        beforeEach(() => {
+            targetCalledSpy = sinon.spy();
+
+            nock('https://api-test.dice.fm')
+                .post('/post')
+                .reply(200, (uri, requestBody) => {
+                    targetCalledSpy(requestBody);
+
+                    return {foo: 'bar'};
+                });
+
+        });
+
+        it('should work with post body as JSON', async () => {
+            const job = {
+                url    : 'https://api-test.dice.fm/post',
+                method : 'POST',
+                headers: {
+                    'content-type': 'application/json',
+                },
+                body: {hey: 'object'}
+            };
+
+            const {statusCode, body} = await processJob(job);
+
+            expect(statusCode).to.eq(200);
+            expect(body).to.deep.eq({
+                foo: 'bar',
+            });
+
+            expect(targetCalledSpy).to.have.been.calledOnce;
+            expect(targetCalledSpy).to.have.been.calledWith({hey: 'object'});
+        });
+
+
+        it('should work with post body as JSON w/o declaring content-type', async () => {
+            const job = {
+                url    : 'https://api-test.dice.fm/post',
+                method : 'POST',
+                body   : {hey: 'object'},
+                headers: {},
+            };
+
+            const {statusCode, body} = await processJob(job);
+
+            expect(statusCode).to.eq(200);
+            expect(body).to.deep.eq({
+                foo: 'bar',
+            });
+
+            expect(targetCalledSpy).to.have.been.calledOnce;
+            expect(targetCalledSpy).to.have.been.calledWith({hey: 'object'});
+        });
+    })
+
     it('should throw errors', async () => {
+        nock('https://api-test.dice.fm')
+            .matchHeader('content-type', 'application/json')
+            .get('/json/418')
+            .reply(418, {
+                foo: 'bar',
+            });
+
         const job = {
             url    : 'https://api-test.dice.fm/json/418',
             method : 'GET',

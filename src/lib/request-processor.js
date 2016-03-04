@@ -4,6 +4,16 @@ import HTMLEntities from 'he';
 
 const debug = require('debug')('dice:timeturner:request-processor');
 
+function isJSONRequest(reqOpts) {
+    const contentType = reqOpts.headers['content-type'];
+
+    if (contentType && contentType !== 'application/json') {
+        return false;
+    }
+
+    return true;
+}
+
 export default function(opts) {
     return async function(job) {
         const {url, headers, body, method} = job;
@@ -17,9 +27,11 @@ export default function(opts) {
             resolveWithFullResponse: true,
         };
 
-        if (reqOpts.headers['content-type'] === 'application/json') {
+        if (isJSONRequest(reqOpts)) {
             reqOpts.json = true;
         }
+
+        debug('performing request', reqOpts);
 
         const response = await request(reqOpts);
 

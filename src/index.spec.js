@@ -102,15 +102,30 @@ describe('timeturner', () => {
         });
 
         describe('creating request', () => {
-            const TARGET_URL = 'https://api-test.dice.fm';
+            const TARGET_ORIGIN = 'https://api-test.dice.fm';
+            const TARGET_PATHNAME = `/${Math.random()}`;
+            const TARGET_HREF = TARGET_ORIGIN + TARGET_PATHNAME;
 
             let targetCalledSpy;
+
+            let jobRunInit;
+            let jobRunSuccess;
+            let jobRunFail;
 
             before(() => {
                 targetCalledSpy = sinon.spy();
 
-                nock('https://api-test.dice.fm')
-                    .get('/')
+                jobRunInit = sinon.spy();
+                jobRunSuccess = sinon.spy();
+                jobRunFail = sinon.spy();
+
+
+                tt.queue.events.on('job:run:init', jobRunInit);
+                tt.queue.events.on('job:run:success', jobRunSuccess);
+                tt.queue.events.on('job:run:fail', jobRunFail);
+
+                nock(TARGET_ORIGIN)
+                    .get(TARGET_PATHNAME)
                     .reply(200, targetCalledSpy);
             });
 
@@ -121,7 +136,7 @@ describe('timeturner', () => {
                 soon.setMilliseconds(soon.getMilliseconds() + 2);
 
                 const reqBody = {
-                    url   : TARGET_URL,
+                    url   : TARGET_HREF,
                     date  : soon,
                     method: 'GET',
                 };
@@ -139,6 +154,10 @@ describe('timeturner', () => {
                 expect(res.body).to.be.an('array');
 
                 expect(res.body.length).to.eq(1);
+
+                const [item] = res.body;
+
+                expect(item.url).to.eq(TARGET_HREF);
             });
 
             it('should trigger the request eventually', async () => {
@@ -147,6 +166,43 @@ describe('timeturner', () => {
                 } while (targetCalledSpy.notCalled);
 
                 expect(targetCalledSpy).to.have.been.calledOnce;
+            });
+
+            it('should have succeeded', async () => {
+                const res = await req.get('/schedule');
+
+                expect(res.statusCode).to.eq(200);
+                expect(res.body).to.be.an('array');
+
+                expect(res.body.length).to.eq(1);
+
+                const [item] = res.body;
+
+                expect(item.state).to.eq('SUCCESS');
+            });
+
+            it('should have emitted events', async () => {
+                expect(jobRunInit).to.have.been.calledOnce;
+                expect(jobRunSuccess).to.have.been.calledOnce;
+                expect(jobRunFail).to.have.been.notCalled;
+
+                let job;
+
+                job = jobRunInit.args[0][0].job;
+
+                expect(job).to.be.an.object;
+                expect(job.url).to.eq(TARGET_HREF);
+                expect(job.state).to.eq('SCHEDULED');
+                expect(job.attempts_count).to.eq(0);
+                expect(job.attempts_max).to.eq(1);
+
+                job = jobRunSuccess.args[0][0].job;
+
+                expect(job).to.be.an.object;
+                expect(job.url).to.eq(TARGET_HREF);
+                expect(job.state).to.eq('SUCCESS');
+                expect(job.attempts_count).to.eq(1);
+                expect(job.attempts_max).to.eq(1);
             });
         });
 

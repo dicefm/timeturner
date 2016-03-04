@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+
+## 0.3.2 (2016-02-19)
+
+* :bug: fix emit of success/fail
+
+
+## 0.3.1 (2016-02-18)
+
+* :art: emit state of req after state updated
+
+
+## 0.3.0 (2016-02-17)
+
+* :sparkles: default req as json if no other content-type specified
+
+
 ## 0.2.4 (2016-02-17)
 
 * :sparkles: ability to automatically retry requests with `attempts_max` & `attempts_delay`
