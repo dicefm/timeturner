@@ -3,9 +3,13 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## 0.3.2 (2016-03-04)
+## 0.3.4 (2016-03-29)
 
 * :art: emit response
+
+## 0.3.3 (2016-03-04)
+
+* :warning: broken release
 
 ## 0.3.2 (2016-02-19)
 
