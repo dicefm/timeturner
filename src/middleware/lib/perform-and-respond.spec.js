@@ -3,16 +3,15 @@ import performAndRespond from './perform-and-respond';
 
 
 describe('performAndRespond', () => {
-    let clock;
+    let resolve;
+    let reject;
     let res;
 
-    before(() => {
-        clock = sinon.useFakeTimers();
-    });
-
-    after(() => {
-        clock.restore();
-    });
+    function clockTick(ms) {
+        return new Promise((resolve) => {
+            setTimeout(resolve, ms);
+        });
+    }
 
     beforeEach(() => {
         res = {};
@@ -20,42 +19,27 @@ describe('performAndRespond', () => {
         ['send', 'status', 'sendStatus'].forEach((key) => {
             res[key] = sinon.spy();
         });
+
+        const promise = new Promise((_resolve, _reject) => {
+            resolve = _resolve;
+            reject = _reject;
+        });
+
+        performAndRespond(promise, res);
     });
-
-    function clockTick(ms) {
-        clock.tick(ms);
-        return new Promise((resolve) => {
-            resolve();
-        });
-    }
-
-    function waitFor(ms, opts = {}) {
-        const {error, payload} = opts;
-        return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                if (error) {
-                    reject(error)
-                } else {
-                    resolve(payload);
-                }
-            }, ms);
-        });
-    }
 
     it('should be a function', () => {
         expect(performAndRespond).to.be.a('function');
     });
 
     it('should await a promise', async () => {
-        performAndRespond(waitFor(10), res);
-
-        await clockTick(5);
-
         expect(res.send).to.have.been.notCalled;
         expect(res.status).to.have.been.notCalled;
         expect(res.sendStatus).to.have.been.notCalled;
 
-        await clockTick(6);
+        resolve();
+        await clockTick(1);
+        await clockTick(1);
 
         expect(res.send).to.have.been.notCalled;
         expect(res.status).to.have.been.notCalled;
@@ -64,15 +48,13 @@ describe('performAndRespond', () => {
     });
 
     it('should await a promise & return payload', async () => {
-        performAndRespond(waitFor(10, {payload: {foo: 'bar'}}), res);
-
-        await clockTick(5);
-
         expect(res.send).to.have.been.notCalled;
         expect(res.status).to.have.been.notCalled;
         expect(res.sendStatus).to.have.been.notCalled;
 
-        await clockTick(6);
+        resolve({foo: 'bar'});
+        await clockTick(1);
+        await clockTick(1);
 
         expect(res.status).to.have.been.notCalled;
         expect(res.sendStatus).to.have.been.notCalled;
@@ -82,15 +64,13 @@ describe('performAndRespond', () => {
 
 
     it('should await a promise & return errors', async () => {
-        performAndRespond(waitFor(10, {error: new Error('msg')}), res);
-
-        await clockTick(5);
-
         expect(res.send).to.have.been.notCalled;
         expect(res.status).to.have.been.notCalled;
         expect(res.sendStatus).to.have.been.notCalled;
 
-        await clockTick(6);
+        reject(new Error('msg'));
+        await clockTick(1);
+        await clockTick(1);
 
         expect(res.sendStatus).to.have.been.notCalled;
 

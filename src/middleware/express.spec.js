@@ -33,7 +33,7 @@ describe('expressMiddleware', () => {
         expect(res.body).to.be.an('array');
     });
 
-    describe(`when creating an item with a unique URL`, () => {
+    describe('when creating an item with a unique URL', () => {
         const date = new Date();
 
         let id, runningId;
@@ -114,7 +114,7 @@ describe('expressMiddleware', () => {
             it('should not updated jobs in intermediate states expected response when updating it', async () => {
                 const {body, statusCode} = await req.patch(`/schedule/${runningId}`).send({data: new Date(), state: 'SCHEDULED'});
                 expect(statusCode).to.eq(403);
-                expect(body.description).to.eq(`You can't change requests that are in a "RUNNING" state`);
+                expect(body.description).to.eq('You can\'t change requests that are in a "RUNNING" state');
             });
 
         });
