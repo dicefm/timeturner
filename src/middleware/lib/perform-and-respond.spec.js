@@ -38,7 +38,8 @@ describe('performAndRespond', () => {
         expect(res.sendStatus).to.have.been.notCalled;
 
         resolve();
-        await clockTick(0);
+        await clockTick(1);
+        await clockTick(1);
 
         expect(res.send).to.have.been.notCalled;
         expect(res.status).to.have.been.notCalled;
@@ -52,7 +53,8 @@ describe('performAndRespond', () => {
         expect(res.sendStatus).to.have.been.notCalled;
 
         resolve({foo: 'bar'});
-        await clockTick(0);
+        await clockTick(1);
+        await clockTick(1);
 
         expect(res.status).to.have.been.notCalled;
         expect(res.sendStatus).to.have.been.notCalled;
@@ -67,7 +69,8 @@ describe('performAndRespond', () => {
         expect(res.sendStatus).to.have.been.notCalled;
 
         reject(new Error('msg'));
-        await clockTick(0);
+        await clockTick(1);
+        await clockTick(1);
 
         expect(res.sendStatus).to.have.been.notCalled;
 
