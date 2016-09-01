@@ -104,7 +104,7 @@ describe('queueModule', () => {
         });
 
 
-        it('should fail', async (done) => {
+        it('should fail', (done) => {
             queue.push(job, function(err) {
                 expect(err).to.be.ok;
 
