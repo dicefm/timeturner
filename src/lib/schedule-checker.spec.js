@@ -17,14 +17,12 @@ describe('scheduleChecker', () => {
     let checkSchedule;
     let queueCreateSpy;
 
-    before(() => {
+    before(async () => {
         db = mongoose.createConnection('mongodb://localhost:27017/timeturner_schedule_checker_tests');
 
         RequestModel = db.model('Request', RequestSchema);
-    });
 
-    before(async () => {
-        await RequestModel.removeAsync({})
+        await RequestModel.removeAsync({});
     });
 
     after(async () => {
