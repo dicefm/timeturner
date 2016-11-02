@@ -48,7 +48,7 @@
     "sinon": "^1.17.4",
     "sinon-chai": "^2.8.0",
     "supertest": "^2.0.0",
-    "supertest-as-promised": "^4.0.0"
+    "supertest-as-promised": "^4.0.2"
   },
   "dependencies": {
     "async": "^2.0.0-rc.5",
